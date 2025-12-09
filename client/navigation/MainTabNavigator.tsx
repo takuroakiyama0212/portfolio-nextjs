@@ -2,26 +2,34 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { Platform, StyleSheet } from "react-native";
-import HomeStackNavigator from "@/navigation/HomeStackNavigator";
-import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
+import { Platform, StyleSheet, View } from "react-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import MapStackNavigator from "@/navigation/MapStackNavigator";
+import ListStackNavigator from "@/navigation/ListStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 export type MainTabParamList = {
-  HomeTab: undefined;
-  ProfileTab: undefined;
+  MapTab: undefined;
+  AddSpotTab: undefined;
+  ListTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+function AddSpotPlaceholder() {
+  return <View />;
+}
+
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
+  const rootNavigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   return (
     <Tab.Navigator
-      initialRouteName="HomeTab"
+      initialRouteName="MapTab"
       screenOptions={{
-        tabBarActiveTintColor: theme.tabIconSelected,
+        tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
@@ -44,22 +52,38 @@ export default function MainTabNavigator() {
       }}
     >
       <Tab.Screen
-        name="HomeTab"
-        component={HomeStackNavigator}
+        name="MapTab"
+        component={MapStackNavigator}
         options={{
-          title: "Home",
+          title: "Map",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="home" size={size} color={color} />
+            <Feather name="map-pin" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="ProfileTab"
-        component={ProfileStackNavigator}
+        name="AddSpotTab"
+        component={AddSpotPlaceholder}
+        listeners={() => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            rootNavigation.navigate("AddSpot");
+          },
+        })}
         options={{
-          title: "Profile",
+          title: "Add Spot",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="user" size={size} color={color} />
+            <Feather name="plus-circle" size={size + 4} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ListTab"
+        component={ListStackNavigator}
+        options={{
+          title: "List",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="list" size={size} color={color} />
           ),
         }}
       />

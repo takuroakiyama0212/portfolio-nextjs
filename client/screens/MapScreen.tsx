@@ -8,14 +8,13 @@ import {
   Pressable,
   Linking,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { BlurView } from "expo-blur";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -33,6 +32,24 @@ import {
   calculateDistance,
 } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+let MapView: any = null;
+let Marker: any = null;
+let PROVIDER_GOOGLE: any = null;
+
+if (Platform.OS !== "web") {
+  const Maps = require("react-native-maps");
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+  PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
+}
+
+type Region = {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
 
 const FILTER_OPTIONS: (VenueType | "all")[] = [
   "all",
@@ -57,7 +74,7 @@ export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<VenueType | "all">("all");
@@ -85,6 +102,11 @@ export default function MapScreen() {
   }, [selectedSpot]);
 
   const requestLocationPermission = async () => {
+    if (Platform.OS === "web") {
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       setLocationPermission(status);
@@ -173,7 +195,7 @@ export default function MapScreen() {
     );
   }
 
-  if (locationPermission === "denied") {
+  if (locationPermission === "denied" && Platform.OS !== "web") {
     return (
       <View style={[styles.permissionContainer, { backgroundColor: theme.backgroundRoot }]}>
         <Feather name="map-pin" size={64} color={theme.primary} />
@@ -183,26 +205,158 @@ export default function MapScreen() {
         <ThemedText secondary style={styles.permissionText}>
           ChargeSpot needs your location to find nearby charging spots.
         </ThemedText>
-        {Platform.OS !== "web" ? (
-          <Pressable
-            style={[styles.permissionButton, { backgroundColor: theme.primary }]}
-            onPress={async () => {
-              try {
-                await Linking.openSettings();
-              } catch (error) {
-                console.log("Cannot open settings");
-              }
-            }}
-          >
-            <ThemedText style={{ color: "#FFFFFF", fontWeight: "600" }}>
-              Open Settings
-            </ThemedText>
-          </Pressable>
-        ) : (
-          <ThemedText secondary style={styles.permissionText}>
-            Please use Expo Go on your mobile device to access location features.
+        <Pressable
+          style={[styles.permissionButton, { backgroundColor: theme.primary }]}
+          onPress={async () => {
+            try {
+              await Linking.openSettings();
+            } catch (error) {
+              console.log("Cannot open settings");
+            }
+          }}
+        >
+          <ThemedText style={{ color: "#FFFFFF", fontWeight: "600" }}>
+            Open Settings
           </ThemedText>
-        )}
+        </Pressable>
+      </View>
+    );
+  }
+
+  const renderSpotCard = ({ item }: { item: ChargingSpot & { distance?: number } }) => (
+    <Pressable
+      style={[styles.webSpotCard, { backgroundColor: theme.backgroundDefault }]}
+      onPress={() => setSelectedSpot(item)}
+    >
+      <View style={styles.webSpotCardHeader}>
+        <View style={[styles.webSpotIcon, { backgroundColor: theme.primary }]}>
+          <Feather name="battery-charging" size={20} color="#FFFFFF" />
+        </View>
+        <View style={{ flex: 1, marginLeft: Spacing.md }}>
+          <ThemedText type="headline">{item.name}</ThemedText>
+          <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }}>
+            {item.address}
+          </ThemedText>
+        </View>
+        <View style={[styles.venueTag, { backgroundColor: theme.primary + "20" }]}>
+          <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "500" }}>
+            {VENUE_TYPE_LABELS[item.venueType]}
+          </ThemedText>
+        </View>
+      </View>
+      <View style={styles.webSpotCardStats}>
+        <View style={styles.statItem}>
+          <Feather name="zap" size={16} color={theme.primary} />
+          <ThemedText secondary style={{ marginLeft: Spacing.xs, fontSize: 14 }}>
+            {item.outletCount} outlets
+          </ThemedText>
+        </View>
+        {item.hours ? (
+          <View style={styles.statItem}>
+            <Feather name="clock" size={16} color={theme.primary} />
+            <ThemedText secondary style={{ marginLeft: Spacing.xs, fontSize: 14 }}>
+              {item.hours}
+            </ThemedText>
+          </View>
+        ) : null}
+      </View>
+      <Pressable
+        style={[styles.directionsButton, { backgroundColor: theme.primary, marginTop: Spacing.md }]}
+        onPress={() => openDirections(item)}
+      >
+        <Feather name="navigation" size={16} color="#FFFFFF" />
+        <ThemedText style={{ color: "#FFFFFF", fontWeight: "600", marginLeft: Spacing.sm }}>
+          Get Directions
+        </ThemedText>
+      </Pressable>
+    </Pressable>
+  );
+
+  if (Platform.OS === "web") {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
+        <View style={[styles.webHeader, { paddingTop: insets.top + Spacing.lg, backgroundColor: theme.backgroundDefault }]}>
+          <View style={styles.webHeaderRow}>
+            <View style={styles.webHeaderTitle}>
+              <Feather name="battery-charging" size={28} color={theme.primary} />
+              <ThemedText type="h4" style={{ marginLeft: Spacing.sm }}>ChargeSpot</ThemedText>
+            </View>
+            <Pressable
+              style={[styles.headerButton, { backgroundColor: theme.backgroundRoot }]}
+              onPress={() => navigation.navigate("Settings")}
+            >
+              <Feather name="settings" size={22} color={theme.text} />
+            </Pressable>
+          </View>
+          
+          <View style={[styles.searchContainer, { backgroundColor: theme.backgroundRoot, marginTop: Spacing.md }]}>
+            <Feather name="search" size={20} color={theme.textSecondary} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.text }]}
+              placeholder="Search charging spots..."
+              placeholderTextColor={theme.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 ? (
+              <Pressable onPress={() => setSearchQuery("")}>
+                <Feather name="x" size={20} color={theme.textSecondary} />
+              </Pressable>
+            ) : null}
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filtersContainer}
+          >
+            {FILTER_OPTIONS.map((filter) => (
+              <Pressable
+                key={filter}
+                style={[
+                  styles.filterChip,
+                  {
+                    backgroundColor:
+                      selectedFilter === filter ? theme.primary : theme.backgroundRoot,
+                  },
+                ]}
+                onPress={() => setSelectedFilter(filter)}
+              >
+                <ThemedText
+                  style={{
+                    color: selectedFilter === filter ? "#FFFFFF" : theme.text,
+                    fontWeight: "500",
+                  }}
+                >
+                  {filter === "all" ? "All" : VENUE_TYPE_LABELS[filter]}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.webNotice}>
+          <Feather name="smartphone" size={16} color={theme.primary} />
+          <ThemedText secondary style={{ marginLeft: Spacing.sm, fontSize: 14 }}>
+            For the full map experience, scan the QR code to open in Expo Go
+          </ThemedText>
+        </View>
+
+        <FlatList
+          data={filteredSpots}
+          keyExtractor={(item) => item.id}
+          renderItem={renderSpotCard}
+          contentContainerStyle={{ padding: Spacing.lg, paddingBottom: tabBarHeight + Spacing.xl }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Feather name="search" size={48} color={theme.textSecondary} />
+              <ThemedText secondary style={{ marginTop: Spacing.md }}>
+                No charging spots found
+              </ThemedText>
+            </View>
+          }
+        />
       </View>
     );
   }
@@ -484,5 +638,54 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     marginTop: Spacing.lg,
+  },
+  webHeader: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
+  },
+  webHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  webHeaderTitle: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  webNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: "rgba(76, 175, 80, 0.1)",
+  },
+  webSpotCard: {
+    borderRadius: BorderRadius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  webSpotCardHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  webSpotIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  webSpotCardStats: {
+    flexDirection: "row",
+    marginTop: Spacing.md,
+    gap: Spacing.xl,
+    marginLeft: 56,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: Spacing["2xl"],
   },
 });

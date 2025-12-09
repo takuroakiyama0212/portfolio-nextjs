@@ -75,6 +75,11 @@ export default function AddSpotScreen() {
   }, [isFormValid, venueName, venueType, outletCount, selectedOutletTypes, notes]);
 
   const getUserLocation = async () => {
+    if (Platform.OS === "web") {
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status === "granted") {
@@ -127,7 +132,14 @@ export default function AddSpotScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {userLocation ? (
+        {Platform.OS === "web" ? (
+          <View style={[styles.mapContainer, { backgroundColor: theme.backgroundSecondary, justifyContent: "center", alignItems: "center" }]}>
+            <Feather name="map-pin" size={32} color={theme.primary} />
+            <ThemedText type="small" secondary style={{ marginTop: Spacing.sm, textAlign: "center" }}>
+              Location will be captured when submitted via mobile app
+            </ThemedText>
+          </View>
+        ) : userLocation ? (
           <View style={styles.mapContainer}>
             <MapView
               style={styles.map}

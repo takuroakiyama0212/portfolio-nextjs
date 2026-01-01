@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarSwipe - Car Matching App</title>
+    <link rel="stylesheet" href="/demo.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🚗</span>
+                    <h1>CarSwipe</h1>
+                </div>
+                <p class="tagline">Find your dream car with a swipe</p>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Swipe. Match. Drive.</h2>
+                <p class="hero-description">
+                    Discover amazing cars through an intuitive swipe interface. 
+                    Like the cars you love, save them to favorites, and find your perfect match.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#features" class="btn btn-primary">Explore Features</a>
+                    <a href="#demo" class="btn btn-secondary">View Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <h2 class="section-title">Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👆</div>
+                    <h3>Swipe Interface</h3>
+                    <p>Swipe right to like, left to pass. Just like your favorite dating app, but for cars!</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>Image Gallery</h3>
+                    <p>Browse through multiple high-quality images for each car with smooth horizontal scrolling.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">❤️</div>
+                    <h3>Favorites</h3>
+                    <p>Save your favorite cars and access them anytime. Requires Google Sign-In for personalized experience.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Secure Login</h3>
+                    <p>Sign in with Google using Firebase Authentication. Your favorites are saved securely per account.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Works seamlessly on Web, iOS, and Android. Built with React Native and Expo.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📤</div>
+                    <h3>Share Cars</h3>
+                    <p>Share car images with model and price information with friends and family.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="demo">
+            <h2 class="section-title">How It Works</h2>
+            <div class="demo-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Browse Cars</h3>
+                        <p>Scroll through a curated selection of premium vehicles</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Swipe & Like</h3>
+                        <p>Swipe right on cars you love, left on ones you don't</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>View Details</h3>
+                        <p>Tap any car to see full specifications, multiple images, and detailed information</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Save Favorites</h3>
+                        <p>Sign in to save your favorite cars and access them later</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section class="tech-stack">
+            <h2 class="section-title">Built With</h2>
+            <div class="tech-grid">
+                <div class="tech-item">React Native</div>
+                <div class="tech-item">Expo</div>
+                <div class="tech-item">TypeScript</div>
+                <div class="tech-item">Firebase</div>
+                <div class="tech-item">React Navigation</div>
+                <div class="tech-item">Reanimated</div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta">
+            <div class="cta-content">
+                <h2>Ready to Find Your Dream Car?</h2>
+                <p>Start swiping and discover amazing vehicles today!</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" id="open-qr">
+                        Try Live Demo (QR)
+                    </button>
+                    <a href="https://github.com/yourusername/auto-matcher-2" class="btn btn-secondary" target="_blank">
+                        View on GitHub
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 CarSwipe. Built with ❤️ using React Native and Expo.</p>
+            <div class="footer-links">
+                <a href="https://github.com/yourusername/auto-matcher-2" target="_blank">GitHub</a>
+                <a href="#features">Features</a>
+                <a href="#demo">Demo</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- QR Modal -->
+    <div class="qr-modal" id="qr-modal" aria-hidden="true">
+        <div class="qr-modal__backdrop" id="qr-backdrop"></div>
+        <div class="qr-modal__content" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+            <button class="qr-modal__close" id="qr-close" aria-label="Close QR modal">✕</button>
+            <h3 id="qr-title">Open CarSwipe Web App</h3>
+            <p class="qr-modal__subtitle">Scan QR code to open the app in your browser</p>
+            <div class="qr-modal__preview">
+                <img id="qr-image" alt="QR code for CarSwipe web app" />
+                <p class="qr-url-display" id="qr-url-display"></p>
+            </div>
+            <label class="qr-modal__label" for="qr-url">Web App URL</label>
+            <input id="qr-url" class="qr-modal__input" type="text" placeholder="https://yourusername.github.io/auto-matcher-2/" />
+            <div class="qr-modal__actions">
+                <button class="btn btn-primary" id="qr-copy">Copy Link</button>
+                <button class="btn btn-secondary" id="qr-open">Open in Browser</button>
+            </div>
+            <p class="qr-modal__hint">
+                💡 <strong>For Mobile QR:</strong> Use your computer's local IP (e.g., <code>http://192.168.1.100:8081</code>)<br>
+                💡 <strong>GitHub Pages:</strong> <code>https://yourusername.github.io/repository-name/</code><br>
+                💡 <strong>Note:</strong> localhost URLs won't work on mobile. Use your network IP address.
+            </p>
+        </div>
+    </div>
+
+    <script src="/demo.js"></script>
+</body>
+</html>
+

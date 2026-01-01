@@ -153,7 +153,7 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
               </div>
 
               {/* Code Content */}
-              <div className="p-6 space-y-3 font-mono text-sm min-h-[300px] bg-gradient-to-br from-brand-primary to-brand-primary/90">
+              <div className="p-4 sm:p-6 space-y-3 font-mono text-xs sm:text-sm min-h-[260px] sm:min-h-[300px] bg-gradient-to-br from-brand-primary to-brand-primary/90 overflow-hidden">
                 {isHydrated ?
                 <>
                     {codeSnippets.map((line, index) =>
@@ -164,8 +164,8 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
                     'text-accent opacity-100 scale-105' : 'text-text-secondary/60 opacity-70'}`
                     }>
 
-                        <span className="text-text-secondary/40 mr-4">{index + 1}</span>
-                        {line}
+                        <span className="text-text-secondary/40 mr-3">{index + 1}</span>
+                        <span className="break-all">{line}</span>
                       </div>
                   )}
                   </> :
@@ -173,8 +173,8 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
                 <>
                     {codeSnippets.map((line, index) =>
                   <div key={index} className="text-text-secondary/60 opacity-70">
-                        <span className="text-text-secondary/40 mr-4">{index + 1}</span>
-                        {line}
+                        <span className="text-text-secondary/40 mr-3">{index + 1}</span>
+                        <span className="break-all">{line}</span>
                       </div>
                   )}
                   </>
@@ -182,7 +182,7 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
               </div>
 
               {/* Profile Image Overlay */}
-              <div className="absolute -bottom-6 -right-6 w-48 h-48 rounded-2xl overflow-hidden border-4 border-surface shadow-elevation">
+              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-48 sm:h-48 rounded-2xl overflow-hidden border-4 border-surface shadow-elevation">
                 <AppImage
                   src="/assets/images/takuro.jpg"
                   alt="Profile photo"

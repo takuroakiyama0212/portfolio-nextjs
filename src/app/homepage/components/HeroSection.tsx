@@ -37,9 +37,8 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
 
   const stats = [
   { value: '5+', label: 'Years Experience' },
-  { value: '15+', label: 'Projects Completed' },
-  { value: '3', label: 'Countries Worked' },
-  { value: '100%', label: 'Client Satisfaction' }];
+  { value: '10+', label: 'Projects Completed' },
+  { value: 'Certified Professional', label: 'AWS, Google Cloud, and multiple development certifications', emphasis: true }];
 
 
   return (
@@ -195,14 +194,14 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 lg:mt-32">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-20 lg:mt-32">
           {stats.map((stat, index) =>
           <div
             key={index}
             className="text-center p-6 bg-surface rounded-xl border border-border hover:border-primary hover:shadow-subtle transition-all duration-base">
 
               <p className="text-3xl lg:text-4xl font-bold text-primary mb-2">{stat.value}</p>
-              <p className="text-sm text-text-secondary font-medium">{stat.label}</p>
+              <p className={`text-sm text-text-secondary font-medium ${stat.emphasis ? 'text-base leading-snug' : ''}`}>{stat.label}</p>
             </div>
           )}
         </div>

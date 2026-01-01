@@ -88,11 +88,6 @@ const ProjectHighlights = () => {
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-base"></div>
-                
-                {/* Icon Badge */}
-                <div className="absolute top-4 right-4 w-12 h-12 bg-surface rounded-xl flex items-center justify-center shadow-subtle">
-                  <Icon name={project.icon as any} size={24} className="text-primary" />
-                </div>
               </div>
 
               {/* Project Content */}

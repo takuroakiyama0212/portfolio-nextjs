@@ -139,8 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const qrCopyBtn = document.getElementById('qr-copy');
     const qrOpenLinkBtn = document.getElementById('qr-open');
 
+    const DEFAULT_WEB_APP_URL = 'https://auto-matcher-e5ig-18qv0tktt-takuro-akiyamas-projects.vercel.app/';
+
     // Set default URL when page loads
-    let defaultUrl = getDefaultWebAppUrl();
+    let defaultUrl = DEFAULT_WEB_APP_URL || getDefaultWebAppUrl();
     
     // If on localhost, try to detect network IP for mobile access
     if (defaultUrl.includes('localhost') || defaultUrl.includes('127.0.0.1')) {

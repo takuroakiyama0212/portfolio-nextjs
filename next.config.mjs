@@ -21,6 +21,18 @@ const nextConfig = {
           protocol: 'https',
           hostname: 'images.pixabay.com',
         },
+        {
+          protocol: 'https',
+          hostname: 'image.thum.io',
+        },
+        {
+          protocol: 'https',
+          hostname: 'takuroakiyama0212.github.io',
+        },
+        {
+          protocol: 'https',
+          hostname: 'img.rocket.new',
+        },
       ],
     },
     async redirects() {
@@ -45,4 +57,3 @@ const nextConfig = {
   };
   
   export default nextConfig;
-  

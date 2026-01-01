@@ -20,10 +20,11 @@ const ProjectHighlights = () => {
     id: 1,
     title: 'Auto Matcher',
     description: 'Intelligent matching system that connects users based on preferences and compatibility scores using advanced algorithms.',
-    image: "/assets/images/auto-matcher.png",
-    alt: 'CarSwipe mobile app interface showing Bugatti Chiron supercar with car details, price, and swipe action buttons',
+    image: "/assets/images/For-car-swipe.png",
+    alt: 'Blue Porsche 911 GT3 supercar with car details and swipe action buttons',
     tags: ['React', 'Node.js', 'MongoDB'],
-    icon: 'SparklesIcon'
+    icon: 'SparklesIcon',
+    url: '/demo.html'
   },
   {
     id: 2,

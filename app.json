@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "ChargeSpot",
-    "slug": "chargespot",
+    "name": "Charge Spotter",
+    "slug": "charge-spotter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "chargespot",
+    "scheme": "chargespotter",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chargespot.app",
+      "bundleIdentifier": "com.chargespotter.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "ChargeSpot needs your location to find nearby charging spots."
+        "NSLocationWhenInUseUsageDescription": "Charge Spotter needs your location to find nearby charging spots."
       }
     },
     "android": {
@@ -22,12 +22,12 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.chargespot.app",
+      "package": "com.chargespotter.app",
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       [
@@ -46,7 +46,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow ChargeSpot to use your location to find nearby charging spots."
+          "locationAlwaysAndWhenInUsePermission": "Allow Charge Spotter to use your location to find nearby charging spots."
         }
       ]
     ],

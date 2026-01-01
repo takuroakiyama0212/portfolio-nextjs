@@ -19,14 +19,9 @@ import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import {
-  MOCK_SPOTS,
-  ChargingSpot,
-  VenueType,
-  VENUE_TYPE_LABELS,
-  calculateDistance,
-} from "@/data/mockData";
+import { ChargingSpot, VenueType, VENUE_TYPE_LABELS, calculateDistance } from "@/data/mockData";
 import { ListStackParamList } from "@/navigation/ListStackNavigator";
+import { useSpots } from "@/hooks/useSpots";
 
 type SortOption = "nearest" | "outlets" | "recent";
 
@@ -45,6 +40,7 @@ export default function ListScreen() {
   const [sortBy, setSortBy] = useState<SortOption>("nearest");
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: spots = [], isLoading: isSpotsLoading } = useSpots();
 
   useEffect(() => {
     getUserLocation();
@@ -69,7 +65,7 @@ export default function ListScreen() {
     }
   };
 
-  const spotsWithDistance = MOCK_SPOTS.map((spot) => ({
+  const spotsWithDistance = spots.map((spot) => ({
     ...spot,
     distance: userLocation
       ? calculateDistance(
@@ -95,7 +91,10 @@ export default function ListScreen() {
         case "outlets":
           return b.outletCount - a.outletCount;
         case "recent":
-          return parseInt(b.id) - parseInt(a.id);
+          return (
+            Number(b.id.match(/\d+/)?.[0] ?? 0) -
+            Number(a.id.match(/\d+/)?.[0] ?? 0)
+          );
         default:
           return 0;
       }
@@ -130,6 +129,16 @@ export default function ListScreen() {
           <Feather name="navigation" size={16} color={theme.primary} />
           <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>
             {item.distance.toFixed(1)} mi
+          </ThemedText>
+        </View>
+        <View style={styles.statItem}>
+          <Feather name="battery-charging" size={16} color={theme.primary} />
+          <ThemedText type="small" style={{ marginLeft: Spacing.xs }}>
+            {item.hasOutlets === true
+              ? "Confirmed"
+              : item.hasOutlets === false
+              ? "No outlets"
+              : `${Math.round((item.powerConfidence ?? 0.5) * 100)}% likely`}
           </ThemedText>
         </View>
       </View>
@@ -181,11 +190,11 @@ export default function ListScreen() {
     </View>
   );
 
-  if (isLoading) {
+  if (isLoading || isSpotsLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.primary} />
-        <ThemedText style={styles.loadingText}>Loading spots...</ThemedText>
+        <ThemedText style={styles.loadingText}>Loading Queensland spots...</ThemedText>
       </ThemedView>
     );
   }

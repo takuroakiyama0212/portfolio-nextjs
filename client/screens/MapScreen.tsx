@@ -24,14 +24,10 @@ import Animated, {
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Shadows, Colors } from "@/constants/theme";
-import {
-  MOCK_SPOTS,
-  ChargingSpot,
-  VenueType,
-  VENUE_TYPE_LABELS,
-  calculateDistance,
-} from "@/data/mockData";
+import { ChargingSpot, VenueType, VENUE_TYPE_LABELS, calculateDistance } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { useSpots } from "@/hooks/useSpots";
+import { SpotsMap } from "@/components/SpotsMap";
 
 let MapView: any = null;
 let Marker: any = null;
@@ -63,17 +59,17 @@ const FILTER_OPTIONS: (VenueType | "all")[] = [
 ];
 
 const DEFAULT_REGION: Region = {
-  latitude: 37.7749,
-  longitude: -122.4194,
-  latitudeDelta: 0.02,
-  longitudeDelta: 0.02,
+  latitude: -27.4698,
+  longitude: 153.0251,
+  latitudeDelta: 0.25,
+  longitudeDelta: 0.25,
 };
 
 export default function MapScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<any>();
   const mapRef = useRef<any>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,6 +78,7 @@ export default function MapScreen() {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: spots = [], isLoading: isSpotsLoading } = useSpots();
 
   const bottomSheetTranslateY = useSharedValue(200);
 
@@ -133,7 +130,7 @@ export default function MapScreen() {
     }
   };
 
-  const filteredSpots = MOCK_SPOTS.filter((spot) => {
+  const filteredSpots = spots.filter((spot) => {
     const matchesFilter = selectedFilter === "all" || spot.venueType === selectedFilter;
     const matchesSearch =
       searchQuery === "" ||
@@ -186,7 +183,9 @@ export default function MapScreen() {
     Linking.openURL(url);
   };
 
-  if (isLoading) {
+  const isBusy = isLoading || isSpotsLoading;
+
+  if (isBusy) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.backgroundRoot }]}>
         <ActivityIndicator size="large" color={theme.primary} />
@@ -203,7 +202,7 @@ export default function MapScreen() {
           Location Access Required
         </ThemedText>
         <ThemedText secondary style={styles.permissionText}>
-          ChargeSpot needs your location to find nearby charging spots.
+          Charge Spotter needs your location to find nearby charging spots.
         </ThemedText>
         <Pressable
           style={[styles.permissionButton, { backgroundColor: theme.primary }]}
@@ -279,7 +278,7 @@ export default function MapScreen() {
           <View style={styles.webHeaderRow}>
             <View style={styles.webHeaderTitle}>
               <Feather name="battery-charging" size={28} color={theme.primary} />
-              <ThemedText type="h4" style={{ marginLeft: Spacing.sm }}>ChargeSpot</ThemedText>
+              <ThemedText type="h4" style={{ marginLeft: Spacing.sm }}>Charge Spotter</ThemedText>
             </View>
             <Pressable
               style={[styles.headerButton, { backgroundColor: theme.backgroundRoot }]}
@@ -336,27 +335,76 @@ export default function MapScreen() {
         </View>
 
         <View style={styles.webNotice}>
-          <Feather name="smartphone" size={16} color={theme.primary} />
+          <Feather name="info" size={16} color={theme.primary} />
           <ThemedText secondary style={{ marginLeft: Spacing.sm, fontSize: 14 }}>
-            For the full map experience, scan the QR code to open in Expo Go
+            Web preview uses a list-first experience. For the full map experience, open in Expo Go.
           </ThemedText>
         </View>
 
-        <FlatList
-          data={filteredSpots}
-          keyExtractor={(item) => item.id}
-          renderItem={renderSpotCard}
-          contentContainerStyle={{ padding: Spacing.lg, paddingBottom: tabBarHeight + Spacing.xl }}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Feather name="search" size={48} color={theme.textSecondary} />
-              <ThemedText secondary style={{ marginTop: Spacing.md }}>
-                No charging spots found
-              </ThemedText>
-            </View>
-          }
-        />
+        <View style={styles.webSplit}>
+          <View style={styles.webMapPane}>
+            <SpotsMap
+              spots={filteredSpots}
+              selectedSpotId={selectedSpot?.id ?? null}
+              onSelectSpot={(spot) => setSelectedSpot(spot)}
+            />
+          </View>
+
+          <View style={styles.webListPane}>
+            {selectedSpot ? (
+              <View style={[styles.webSelectedCard, { backgroundColor: theme.backgroundDefault }]}>
+                <View style={styles.webSelectedHeader}>
+                  <View style={{ flex: 1 }}>
+                    <ThemedText type="headline">{selectedSpot.name}</ThemedText>
+                    <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }}>
+                      {selectedSpot.address}
+                    </ThemedText>
+                  </View>
+                  <Pressable onPress={() => setSelectedSpot(null)} style={styles.webClose}>
+                    <Feather name="x" size={18} color={theme.textSecondary} />
+                  </Pressable>
+                </View>
+
+                <View style={styles.webSelectedRow}>
+                  <Feather name="battery-charging" size={16} color={theme.primary} />
+                  <ThemedText style={{ marginLeft: Spacing.sm }}>
+                    {selectedSpot.hasOutlets === true
+                      ? "Outlets confirmed"
+                      : selectedSpot.hasOutlets === false
+                        ? "No outlets reported"
+                        : `Estimated ${Math.round((selectedSpot.powerConfidence ?? 0.5) * 100)}% chance of outlets`}
+                  </ThemedText>
+                </View>
+
+                <Pressable
+                  style={[styles.webPrimaryButton, { backgroundColor: theme.primary }]}
+                  onPress={() => navigation.navigate("LocationDetails", { spotId: selectedSpot.id })}
+                >
+                  <Feather name="info" size={16} color="#FFFFFF" />
+                  <ThemedText style={{ color: "#FFFFFF", fontWeight: "700", marginLeft: Spacing.sm }}>
+                    View details
+                  </ThemedText>
+                </Pressable>
+              </View>
+            ) : null}
+
+            <FlatList
+              data={filteredSpots}
+              keyExtractor={(item) => item.id}
+              renderItem={renderSpotCard}
+              contentContainerStyle={{ padding: Spacing.lg, paddingBottom: tabBarHeight + Spacing.xl }}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Feather name="search" size={48} color={theme.textSecondary} />
+                  <ThemedText secondary style={{ marginTop: Spacing.md }}>
+                    No charging spots found
+                  </ThemedText>
+                </View>
+              }
+            />
+          </View>
+        </View>
       </View>
     );
   }
@@ -489,6 +537,33 @@ export default function MapScreen() {
                 </View>
               ) : null}
             </View>
+            <View style={styles.powerRow}>
+              <Feather name="battery-charging" size={18} color={theme.primary} />
+              <View style={{ marginLeft: Spacing.sm, flex: 1 }}>
+                <ThemedText>
+                  {selectedSpot.hasOutlets === true
+                    ? "Outlets confirmed"
+                    : selectedSpot.hasOutlets === false
+                    ? "No outlets reported"
+                    : `Estimated ${Math.round((selectedSpot.powerConfidence ?? 0.5) * 100)}% chance of outlets`}
+                </ThemedText>
+                <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }}>
+                  Community votes: {(selectedSpot.communityYesVotes ?? 0)} yes / {(selectedSpot.communityNoVotes ?? 0)} no
+                </ThemedText>
+              </View>
+            </View>
+            <Pressable
+              style={[
+                styles.directionsButton,
+                { backgroundColor: theme.backgroundSecondary, marginTop: Spacing.sm },
+              ]}
+              onPress={() => navigation.navigate("LocationDetails", { spotId: selectedSpot.id })}
+            >
+              <Feather name="info" size={18} color={theme.primary} />
+              <ThemedText style={{ color: theme.text, fontWeight: "700", marginLeft: Spacing.sm }}>
+                View details
+              </ThemedText>
+            </Pressable>
             <Pressable
               style={[styles.directionsButton, { backgroundColor: theme.primary }]}
               onPress={() => openDirections(selectedSpot)}
@@ -627,6 +702,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     gap: Spacing.xl,
   },
+  powerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: Spacing.md,
+  },
   statItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -659,6 +739,48 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     backgroundColor: "rgba(76, 175, 80, 0.1)",
+  },
+  webSplit: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  webMapPane: {
+    flex: 1,
+    padding: Spacing.lg,
+  },
+  webListPane: {
+    width: 420,
+    maxWidth: "42%",
+  },
+  webSelectedCard: {
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.lg,
+  },
+  webSelectedHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  webClose: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  webSelectedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: Spacing.md,
+  },
+  webPrimaryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.lg,
   },
   webSpotCard: {
     borderRadius: BorderRadius.md,

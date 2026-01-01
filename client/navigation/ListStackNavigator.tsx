@@ -20,14 +20,14 @@ export default function ListStackNavigator() {
         name="List"
         component={ListScreen}
         options={{
-          headerTitle: "Nearby Spots",
+          headerTitle: "Charge Spotter",
         }}
       />
       <Stack.Screen
         name="LocationDetails"
         component={LocationDetailsScreen}
         options={{
-          headerTitle: "Details",
+          headerTitle: "Spot details",
         }}
       />
     </Stack.Navigator>

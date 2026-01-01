@@ -7,6 +7,7 @@ import {
   Platform,
   Linking,
   Share,
+  ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
@@ -27,16 +28,17 @@ import * as Location from "expo-location";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
+import { SpotsMap } from "@/components/SpotsMap";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
-  MOCK_SPOTS,
   ChargingSpot,
   VENUE_TYPE_LABELS,
   OUTLET_TYPE_LABELS,
   calculateDistance,
 } from "@/data/mockData";
 import { ListStackParamList } from "@/navigation/ListStackNavigator";
+import { useSpots } from "@/hooks/useSpots";
 
 type LocationDetailsRouteProp = RouteProp<ListStackParamList, "LocationDetails">;
 
@@ -47,9 +49,18 @@ export default function LocationDetailsScreen() {
   const navigation = useNavigation();
   const { spotId } = route.params;
 
+  const { data: spots = [], isLoading: isSpotsLoading } = useSpots();
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [votes, setVotes] = useState<{ yes: number; no: number }>({ yes: 0, no: 0 });
 
-  const spot = MOCK_SPOTS.find((s) => s.id === spotId);
+  const spot = spots.find((s) => s.id === spotId);
+
+  useEffect(() => {
+    setVotes({
+      yes: spot?.communityYesVotes ?? 0,
+      no: spot?.communityNoVotes ?? 0,
+    });
+  }, [spotId, spot]);
 
   useEffect(() => {
     getUserLocation();
@@ -84,6 +95,19 @@ export default function LocationDetailsScreen() {
       )
     : null;
 
+  const totalVotes = votes.yes + votes.no;
+  const communityConsensus = totalVotes === 0 ? null : votes.yes >= votes.no ? "yes" : "no";
+  const estimatedConfidence =
+    spot?.hasOutlets === true ? 1 : spot?.hasOutlets === false ? 0 : spot?.powerConfidence ?? 0.5;
+  const blendedConfidence =
+    totalVotes === 0 ? estimatedConfidence : votes.yes / Math.max(totalVotes, 1) * 0.6 + estimatedConfidence * 0.4;
+
+  const handleVote = (choice: "yes" | "no") => {
+    setVotes((prev) =>
+      choice === "yes" ? { yes: prev.yes + 1, no: prev.no } : { yes: prev.yes, no: prev.no + 1 }
+    );
+  };
+
   const openDirections = () => {
     if (!spot) return;
     const url = Platform.select({
@@ -111,10 +135,150 @@ export default function LocationDetailsScreen() {
     }
   };
 
+  if (isSpotsLoading) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <ThemedText style={styles.loadingText}>Loading Queensland spot...</ThemedText>
+      </ThemedView>
+    );
+  }
+
   if (!spot) {
     return (
       <ThemedView style={styles.container}>
         <ThemedText>Spot not found</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  // Web-safe details UI (react-native-maps is not available on web).
+  if (Platform.OS === "web") {
+    const confidence =
+      spot.hasOutlets === true ? 1 : spot.hasOutlets === false ? 0 : spot.powerConfidence ?? 0.5;
+    const yesVotes = votes.yes;
+    const noVotes = votes.no;
+
+    const openGoogleMaps = () => {
+      const q = encodeURIComponent(`${spot.name} @ ${spot.latitude},${spot.longitude}`);
+      Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${q}`);
+    };
+
+    return (
+      <ThemedView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: insets.bottom + Spacing.xl },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.mapContainer}>
+            <SpotsMap
+              spots={[spot]}
+              selectedSpotId={spot.id}
+              onSelectSpot={() => {
+                // no-op (single spot)
+              }}
+            />
+          </View>
+
+          <View style={styles.content}>
+            <View style={styles.headerRow}>
+              <View style={[styles.venueTag, { backgroundColor: theme.primary + "20" }]}>
+                <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "700" }}>
+                  {VENUE_TYPE_LABELS[spot.venueType]}
+                </ThemedText>
+              </View>
+            </View>
+
+            <Card style={styles.infoCard}>
+              <View style={styles.infoRow}>
+                <Feather name="map-pin" size={20} color={theme.primary} />
+                <View style={styles.infoContent}>
+                  <ThemedText>{spot.address}</ThemedText>
+                </View>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Feather name="clock" size={20} color={theme.primary} />
+                <View style={styles.infoContent}>
+                  <ThemedText>{spot.hours || "Hours not available yet"}</ThemedText>
+                </View>
+              </View>
+
+              {spot.phone ? (
+                <Pressable style={styles.infoRow} onPress={handleCall}>
+                  <Feather name="phone" size={20} color={theme.primary} />
+                  <View style={styles.infoContent}>
+                    <ThemedText type="link">{spot.phone}</ThemedText>
+                  </View>
+                </Pressable>
+              ) : null}
+            </Card>
+
+            <Card style={styles.outletsCard}>
+              <ThemedText type="headline" style={styles.sectionTitle}>
+                Charging info
+              </ThemedText>
+              <View style={styles.outletsStats}>
+                <View style={styles.outletCountContainer}>
+                  <Feather name="zap" size={24} color={theme.primary} />
+                  <ThemedText type="h3" style={{ marginLeft: Spacing.sm }}>
+                    {spot.outletCount}
+                  </ThemedText>
+                  <ThemedText secondary style={{ marginLeft: Spacing.xs }}>
+                    outlets
+                  </ThemedText>
+                </View>
+                <View style={styles.outletTypes}>
+                  {spot.outletTypes.map((type) => (
+                    <View
+                      key={type}
+                      style={[styles.outletTag, { backgroundColor: theme.backgroundSecondary }]}
+                    >
+                      <ThemedText type="small">{OUTLET_TYPE_LABELS[type]}</ThemedText>
+                    </View>
+                  ))}
+                </View>
+              </View>
+              <ThemedText secondary type="small" style={{ marginTop: Spacing.sm }}>
+                {spot.hasOutlets === true
+                  ? "Outlets confirmed on site."
+                  : spot.hasOutlets === false
+                    ? "Reports indicate outlets are unavailable."
+                    : `Estimated ${Math.round(confidence * 100)}% chance of outlets.`}
+              </ThemedText>
+              <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }}>
+                Community votes: {yesVotes} yes / {noVotes} no
+              </ThemedText>
+            </Card>
+
+            {spot.tips && spot.tips.length > 0 ? (
+              <Card style={styles.tipsCard}>
+                <ThemedText type="headline" style={styles.sectionTitle}>
+                  Helpful tips
+                </ThemedText>
+                {spot.tips.map((tip, index) => (
+                  <View key={index} style={styles.tipRow}>
+                    <Feather name="check-circle" size={16} color={theme.primary} />
+                    <ThemedText style={styles.tipText}>{tip}</ThemedText>
+                  </View>
+                ))}
+              </Card>
+            ) : null}
+
+            <Pressable
+              style={[styles.directionsButton, { backgroundColor: theme.primary }]}
+              onPress={openGoogleMaps}
+            >
+              <Feather name="navigation" size={20} color="#FFFFFF" />
+              <ThemedText style={{ color: "#FFFFFF", fontWeight: "700", marginLeft: Spacing.sm }}>
+                Open in Google Maps
+              </ThemedText>
+            </Pressable>
+          </View>
+        </ScrollView>
       </ThemedView>
     );
   }
@@ -222,6 +386,68 @@ export default function LocationDetailsScreen() {
                 ))}
               </View>
             </View>
+            <ThemedText secondary type="small" style={{ marginTop: Spacing.sm }}>
+              {spot.hasOutlets === true
+                ? "Outlets confirmed on site."
+                : spot.hasOutlets === false
+                ? "Reports indicate outlets are unavailable."
+                : `Estimated ${Math.round(blendedConfidence * 100)}% chance of outlets.`}
+            </ThemedText>
+          </Card>
+
+          <Card style={styles.voteCard}>
+            <ThemedText type="headline" style={styles.sectionTitle}>
+              Outlet Verification
+            </ThemedText>
+            <ThemedText secondary>
+              Community votes decide if outlets exist. More votes increase confidence.
+            </ThemedText>
+            <ThemedText secondary type="small" style={{ marginTop: Spacing.sm }}>
+              Now: {votes.yes} yes / {votes.no} no (estimated {Math.round(blendedConfidence * 100)}% yes probability)
+            </ThemedText>
+            <View style={styles.voteRow}>
+              <Pressable
+                style={[
+                  styles.voteButton,
+                  { borderColor: theme.primary },
+                  communityConsensus === "yes" && { backgroundColor: theme.primary + "20" },
+                ]}
+                onPress={() => handleVote("yes")}
+              >
+                <ThemedText
+                  style={[
+                    styles.voteButtonText,
+                    { color: theme.primary },
+                    communityConsensus === "yes" && { fontWeight: "700" },
+                  ]}
+                >
+                  Outlets available
+                </ThemedText>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.voteButton,
+                  { borderColor: theme.textSecondary },
+                  communityConsensus === "no" && { backgroundColor: theme.textSecondary + "20" },
+                ]}
+                onPress={() => handleVote("no")}
+              >
+                <ThemedText
+                  style={[
+                    styles.voteButtonText,
+                    { color: theme.text },
+                    communityConsensus === "no" && { fontWeight: "700" },
+                  ]}
+                >
+                  No outlets
+                </ThemedText>
+              </Pressable>
+            </View>
+            {communityConsensus ? (
+              <ThemedText type="small" style={{ marginTop: Spacing.sm }}>
+                Current consensus: {communityConsensus === "yes" ? "Outlets likely available" : "Outlets likely unavailable"}
+              </ThemedText>
+            ) : null}
           </Card>
 
           {spot.tips && spot.tips.length > 0 ? (
@@ -256,6 +482,14 @@ export default function LocationDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: Spacing.lg,
   },
   scrollContent: {
     paddingTop: Spacing.lg,
@@ -315,6 +549,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: Spacing.md,
   },
+  voteCard: {
+    marginBottom: Spacing.md,
+  },
   outletsStats: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -333,6 +570,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.xs,
+  },
+  voteRow: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  voteButton: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  voteButtonText: {
+    fontWeight: "600",
   },
   tipsCard: {
     marginBottom: Spacing.lg,

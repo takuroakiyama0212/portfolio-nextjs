@@ -28,7 +28,7 @@ export default function RootStackNavigator() {
         component={AddSpotScreen}
         options={{
           presentation: "modal",
-          headerTitle: "Add Charging Spot",
+          headerTitle: "Add a spot",
         }}
       />
       <Stack.Screen

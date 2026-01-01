@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import Header from '../../../components/common/Header';
-import HeroSection from './HeroSection.tsx';
-import ProjectHighlights from './ProjectHighlights.tsx';
-import AboutSection from './AboutSection.tsx';
-import SkillsShowcase from './SkillsShowcase.tsx';
-import ContactSection from './ContactSection.tsx';
-import Footer from './Footer.tsx';
+import HeroSection from './HeroSection';
+import ProjectHighlights from './ProjectHighlights';
+import AboutSection from './AboutSection';
+import SkillsShowcase from './SkillsShowcase';
+import ContactSection from './ContactSection';
+import Footer from './Footer';
 
 const HomepageInteractive = () => {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -24,11 +24,11 @@ const HomepageInteractive = () => {
   };
 
   const handleDownloadResume = () => {
-    // Mock resume download
+    // Download resume from public/
     if (isHydrated) {
       const link = document.createElement('a');
-      link.href = '#';
-      link.download = 'Takuro_Resume.pdf';
+      link.href = '/TakuroAkiyama-resume.pdf';
+      link.download = 'TakuroAkiyama-resume.pdf';
       link?.click();
     }
   };

@@ -11,6 +11,7 @@ interface Project {
   alt: string;
   tags: string[];
   icon: string;
+  url?: string;
 }
 
 const ProjectHighlights = () => {
@@ -19,8 +20,8 @@ const ProjectHighlights = () => {
     id: 1,
     title: 'Auto Matcher',
     description: 'Intelligent matching system that connects users based on preferences and compatibility scores using advanced algorithms.',
-    image: "https://img.rocket.new/generatedImages/rocket_gen_img_12f5fe13a-1764644024710.png",
-    alt: 'Modern dashboard interface showing matching algorithm visualization with blue and purple gradient charts on dark background',
+    image: "/assets/images/auto-matcher.png",
+    alt: 'CarSwipe mobile app interface showing Bugatti Chiron supercar with car details, price, and swipe action buttons',
     tags: ['React', 'Node.js', 'MongoDB'],
     icon: 'SparklesIcon'
   },
@@ -46,10 +47,11 @@ const ProjectHighlights = () => {
     id: 4,
     title: 'YouTube Dual Subtitle',
     description: 'Browser extension enabling simultaneous display of two subtitle languages for enhanced language learning experience.',
-    image: "https://img.rocket.new/generatedImages/rocket_gen_img_140107a56-1765126812866.png",
-    alt: 'Video player interface showing dual language subtitles in English and Japanese with synchronized text display',
+    image: "/assets/images/youtube-dual-subtitle.png",
+    alt: 'YouTube Dual Subtitle extension showing video player with Japanese, Korean, and English subtitles displayed simultaneously',
     tags: ['JavaScript', 'Chrome Extension', 'YouTube API'],
-    icon: 'LanguageIcon'
+    icon: 'LanguageIcon',
+    url: 'https://takuroakiyama0212.github.io/my-youtube-dual-subtitle/'
   }];
 
 
@@ -116,10 +118,22 @@ const ProjectHighlights = () => {
                 </div>
 
                 <div className="flex items-center justify-end pt-4 border-t border-border">
-                  <div className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all duration-base">
-                    View Details
-                    <Icon name="ArrowRightIcon" size={16} />
-                  </div>
+                  {project.url ? (
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all duration-base cursor-pointer hover:text-primary/80"
+                    >
+                      View Details
+                      <Icon name="ArrowRightIcon" size={16} />
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all duration-base">
+                      View Details
+                      <Icon name="ArrowRightIcon" size={16} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

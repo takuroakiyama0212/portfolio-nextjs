@@ -152,7 +152,7 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
               </div>
 
               {/* Code Content */}
-              <div className="p-4 sm:p-6 space-y-3 font-mono text-xs sm:text-sm min-h-[260px] sm:min-h-[300px] bg-gradient-to-br from-brand-primary to-brand-primary/90 overflow-hidden">
+              <div className="p-4 sm:p-6 pb-16 sm:pb-20 space-y-3 font-mono text-xs sm:text-sm min-h-[260px] sm:min-h-[300px] bg-gradient-to-br from-brand-primary to-brand-primary/90 overflow-hidden">
                 {isHydrated ?
                 <>
                     {codeSnippets.map((line, index) =>
@@ -181,7 +181,7 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
               </div>
 
               {/* Profile Image Overlay */}
-              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-48 sm:h-48 rounded-2xl overflow-hidden border-4 border-surface shadow-elevation">
+              <div className="absolute -bottom-2 -right-2 sm:-bottom-4 sm:-right-4 w-28 h-28 sm:w-40 sm:h-40 rounded-2xl overflow-hidden border-4 border-surface shadow-elevation">
                 <AppImage
                   src="/assets/images/takuro.jpg"
                   alt="Profile photo"
@@ -198,10 +198,10 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
           {stats.map((stat, index) =>
           <div
             key={index}
-            className="text-center p-6 bg-surface rounded-xl border border-border hover:border-primary hover:shadow-subtle transition-all duration-base">
+            className="text-center p-6 bg-surface rounded-xl border border-border hover:border-primary hover:shadow-subtle transition-all duration-base flex flex-col items-center justify-center gap-2 min-h-[150px]">
 
               <p className="text-3xl lg:text-4xl font-bold text-primary mb-2">{stat.value}</p>
-              <p className={`text-sm text-text-secondary font-medium ${stat.emphasis ? 'text-base leading-snug' : ''}`}>{stat.label}</p>
+              <p className={`text-sm text-text-secondary font-medium text-center ${stat.emphasis ? 'text-base leading-snug' : ''}`}>{stat.label}</p>
             </div>
           )}
         </div>

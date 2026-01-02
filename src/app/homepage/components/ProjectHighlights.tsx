@@ -30,7 +30,7 @@ const ProjectHighlights = () => {
     id: 2,
     title: 'Charge Spotter',
     description: 'Real-time EV charging station locator with availability tracking and route optimization for electric vehicle drivers.',
-    image: "/public/assets/images/charge-spotter.png,
+    image: "/assets/images/charge-spotter.png",
     alt: 'Charge Spotter app interface showing Brisbane map with charging spot locations, search bar, category filters, and list view',
     tags: ['Next.js', 'TypeScript', 'Google Maps API'],
     icon: 'BoltIcon',

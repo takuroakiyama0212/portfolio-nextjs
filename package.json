@@ -21,7 +21,7 @@
     "check:format": "prettier --check \"**/*.{js,ts,tsx,css,json}\"",
     "format": "prettier --write \"**/*.{js,ts,tsx,css,json}\""
     ,
-    "web:build": "npx expo export --platform web --output-dir web-build"
+    "build:web": "npx expo export --platform web --output-dir web-build"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

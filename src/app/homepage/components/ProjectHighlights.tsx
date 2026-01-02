@@ -30,10 +30,11 @@ const ProjectHighlights = () => {
     id: 2,
     title: 'Charge Spotter',
     description: 'Real-time EV charging station locator with availability tracking and route optimization for electric vehicle drivers.',
-    image: "https://img.rocket.new/generatedImages/rocket_gen_img_16f293165-1765107317626.png",
-    alt: 'Electric vehicle charging station map interface displayed on laptop screen with green location markers and route planning',
+    image: "/assets/images/charge-spotter.png",
+    alt: 'Charge Spotter app interface showing Brisbane map with charging spot locations, search bar, category filters, and list view',
     tags: ['Next.js', 'TypeScript', 'Google Maps API'],
-    icon: 'BoltIcon'
+    icon: 'BoltIcon',
+    url: 'https://charge-spotter-wjwh-rjm60m0u2-takuro-akiyamas-projects.vercel.app/'
   },
   {
     id: 3,

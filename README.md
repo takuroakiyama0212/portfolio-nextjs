@@ -113,3 +113,33 @@ You can check out the [Next.js GitHub repository](https://github.com/vercel/next
 - Styled with Tailwind CSS
 
 Built with ❤️ on Rocket.new
+
+## 📝 Recent Changes
+
+### CarSwipe Demo Integration (Latest Update)
+
+**Added Files:**
+- `public/demo.html` - CarSwipe demo page with features, how-it-works section, and QR code modal
+- `public/demo.css` - Styling for the CarSwipe demo page with responsive design
+- `public/demo.js` - JavaScript functionality for smooth scrolling, QR code generation, and modal interactions
+- `public/assets/images/For-car-swipe.png` - Blue Porsche 911 GT3 car image for the Auto Matcher project
+
+**Modified Files:**
+- `src/app/homepage/components/ProjectHighlights.tsx`
+  - Updated Auto Matcher project image to use local file: `/assets/images/For-car-swipe.png`
+  - Added `url: '/demo.html'` property to enable "View Details" link navigation to the demo page
+  - Updated alt text to reflect the blue Porsche 911 GT3 supercar image
+
+**Changes:**
+1. Integrated CarSwipe demo page as a standalone HTML page accessible at `/demo.html`
+2. Updated the Auto Matcher project card in the ProjectHighlights component to display the blue car image
+3. Configured the "View Details" link to navigate to the demo page when clicked
+4. Demo page includes features showcase, step-by-step instructions, tech stack, and QR code modal for mobile access
+
+### Homepage Updates (Latest)
+- Removed the top-right project overlay icons for a cleaner card design
+- Updated hero stats to three items: `5+ Years Experience`, `10+ Projects Completed`, and a highlighted `Certified Professional` (AWS, Google Cloud, multiple development certifications)
+- Contact form now opens the default mail client to email `akiyamatakuro0212@gmail.com` with the user’s message details
+- Adjusted code card overlay sizing/padding to avoid covering text and centered stats content
+- QR modal default Web App URL set to `https://auto-matcher-e5ig-18qv0tktt-takuro-akiyamas-projects.vercel.app/`
+- Updated Charge Spotter project: added `url` property linking to `https://charge-spotter-wjwh-rjm60m0u2-takuro-akiyamas-projects.vercel.app` and changed image path to `/assets/images/charge-spotter.png`

@@ -34,8 +34,13 @@ const ContactSection = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
+    const subject = formData.subject || 'Portfolio Contact';
+    const body = `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`;
+    const mailtoLink = `mailto:akiyamatakuro0212@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Open default mail client with prefilled details
+    window.location.href = mailtoLink;
+
       setIsSubmitting(false);
       setSubmitStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '' });
@@ -43,7 +48,6 @@ const ContactSection = () => {
       setTimeout(() => {
         setSubmitStatus('idle');
       }, 5000);
-    }, 2000);
   };
 
   const contactMethods = [

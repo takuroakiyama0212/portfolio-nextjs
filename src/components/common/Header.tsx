@@ -22,7 +22,7 @@ const Header = ({ className = '' }: HeaderProps) => {
   };
 
   return (
-    <header className={`w-full bg-surface border-b border-border sticky top-0 z-50 ${className}`}>
+    <header className={`w-full sticky top-0 z-50 border-b border-border/30 shadow-elevation backdrop-blur-xl bg-[rgba(11,18,36,0.92)] ${className}`}>
       <div className="w-full">
         <div className="flex items-center justify-between h-16 px-4 md:px-6 lg:px-8">
           {/* Logo */}
@@ -30,7 +30,7 @@ const Header = ({ className = '' }: HeaderProps) => {
             <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
               <span className="text-primary-foreground font-bold text-xl font-mono">T</span>
             </div>
-            <span className="text-xl font-semibold text-brand-primary font-headline hidden sm:block">
+            <span className="text-xl font-semibold text-brand-primary-foreground font-headline hidden sm:block">
               Takuro
             </span>
           </Link>
@@ -41,7 +41,7 @@ const Header = ({ className = '' }: HeaderProps) => {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-muted rounded-lg transition-all duration-base"
+                className="px-4 py-2 text-sm font-medium text-brand-primary-foreground/70 hover:text-brand-primary-foreground hover:bg-white/5 rounded-lg transition-all duration-base"
               >
                 {item.label}
               </Link>
@@ -67,7 +67,7 @@ const Header = ({ className = '' }: HeaderProps) => {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-muted rounded-lg transition-all duration-base"
+            className="md:hidden p-2 text-brand-primary-foreground/70 hover:text-brand-primary-foreground hover:bg-white/5 rounded-lg transition-all duration-base"
             aria-label="Toggle mobile menu"
           >
             <Icon name={isMobileMenuOpen ? 'XMarkIcon' : 'Bars3Icon'} size={24} />
@@ -76,19 +76,19 @@ const Header = ({ className = '' }: HeaderProps) => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border bg-surface animate-fade-in">
+          <div className="md:hidden border-t border-border/30 bg-[rgba(11,18,36,0.96)] animate-fade-in">
             <nav className="flex flex-col px-4 py-3 space-y-1">
               {navigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-4 py-3 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-muted rounded-lg transition-all duration-base"
+                  className="px-4 py-3 text-sm font-medium text-brand-primary-foreground/70 hover:text-brand-primary-foreground hover:bg-white/5 rounded-lg transition-all duration-base"
                 >
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-3 space-y-2 border-t border-border mt-2">
+              <div className="pt-3 space-y-2 border-t border-border/30 mt-2">
                 <Link
                   href="/projects-showcase"
                   onClick={() => setIsMobileMenuOpen(false)}

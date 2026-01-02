@@ -1,0 +1,292 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Download - APP_NAME_PLACEHOLDER</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg0: #0b1220;
+        --bg1: #0f1b2d;
+        --card: rgba(255, 255, 255, 0.08);
+        --card2: rgba(255, 255, 255, 0.06);
+        --border: rgba(255, 255, 255, 0.14);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.72);
+        --muted2: rgba(255, 255, 255, 0.55);
+        --primary: #4caf50;
+        --primary2: #2dd4bf;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+        --radius: 18px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial;
+        color: var(--text);
+        background:
+          radial-gradient(1000px 700px at 18% 10%, rgba(76, 175, 80, 0.28), transparent 55%),
+          radial-gradient(900px 700px at 88% 18%, rgba(45, 212, 191, 0.22), transparent 60%),
+          linear-gradient(180deg, var(--bg0), var(--bg1));
+      }
+      a {
+        color: inherit;
+      }
+      .wrap {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 28px 16px;
+      }
+      .shell {
+        width: 100%;
+        max-width: 980px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .logo img {
+        width: 26px;
+        height: 26px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+      .subtitle {
+        margin: 4px 0 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .card {
+        background: linear-gradient(180deg, var(--card), var(--card2));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .card-inner {
+        padding: 18px;
+      }
+      .kicker {
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.01em;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+        margin: 0 0 12px 0;
+      }
+      .qr-box {
+        width: 260px;
+        height: 260px;
+        margin: 0 auto;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        padding: 14px;
+        display: grid;
+        place-items: center;
+      }
+      .qr-box canvas {
+        width: 100%;
+        height: 100%;
+      }
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.09);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.28), rgba(45, 212, 191, 0.2));
+        border-color: rgba(76, 175, 80, 0.45);
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 12px;
+      }
+      .mini {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+      }
+      .mini:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .mini img {
+        width: 16px;
+        height: 16px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+        color: rgba(255, 255, 255, 0.9);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="shell">
+        <div class="top">
+          <div class="brand">
+            <div class="logo"><img src="/assets/images/icon.png" alt="" /></div>
+            <div>
+              <h1>APP_NAME_PLACEHOLDER</h1>
+              <p class="subtitle">Download and open on phone, or use the web version.</p>
+            </div>
+          </div>
+          <a class="mini" href="/" style="justify-self: end">Back</a>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="card-inner">
+              <div class="kicker">Open on phone (Expo Go)</div>
+              <p class="muted">
+                Scan the QR code in Expo Go. On LAN (http) we use <code>exp://</code>, and on HTTPS we use <code>exps://</code>.
+              </p>
+              <div class="qr-box" id="qr-app" aria-label="Expo Go QR Code"></div>
+              <div class="row">
+                <a class="btn btn-primary" id="open-expo" href="#">
+                  Open in Expo Go
+                </a>
+              </div>
+              <div class="row">
+                <a class="mini" href="https://apps.apple.com/app/id982107779" target="_blank" rel="noreferrer">
+                  <img src="https://apps.apple.com/assets/images/favicon/favicon-apps-48-fad34e0d87e86dcf72ded1faff4ba9d0.png" alt="" />
+                  App Store
+                </a>
+                <a class="mini" href="https://play.google.com/store/apps/details?id=host.exp.exponent" target="_blank" rel="noreferrer">
+                  <img src="https://www.gstatic.com/android/market_images/web/favicon_v3.ico" alt="" />
+                  Google Play
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-inner">
+              <div class="kicker">Open in web browser</div>
+              <p class="muted">
+                This link opens the web build when available. If you are in dev mode, make sure Expo is running with web enabled.
+              </p>
+              <div class="qr-box" id="qr-web" aria-label="Web QR Code"></div>
+              <div class="row">
+                <a class="btn btn-primary" id="open-web" href="BASE_URL_PLACEHOLDER/web">
+                  Open web version
+                </a>
+              </div>
+              <p class="muted" style="margin-top: 12px">
+                If <code>/web</code> is not built yet, run: <code>npm run web:build</code>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+    <script>
+      (function () {
+        const isSecure = window.location.protocol === "https:";
+        const scheme = isSecure ? "exps" : "exp";
+        const deepLink = scheme + "://EXPS_URL_PLACEHOLDER";
+
+        const appQr = new QRCodeStyling({
+          width: 500,
+          height: 500,
+          data: deepLink,
+          image: "/assets/images/icon.png",
+          dotsOptions: { color: "#0b1220", type: "rounded" },
+          backgroundOptions: { color: "#ffffff" },
+          imageOptions: { crossOrigin: "anonymous", margin: 8, imageSize: 0.4, borderRadius: 8 },
+          cornersSquareOptions: { type: "extra-rounded" },
+          cornersDotOptions: { type: "dot" },
+          qrOptions: { errorCorrectionLevel: "H" },
+        });
+        appQr.append(document.getElementById("qr-app"));
+
+        const openExpo = document.getElementById("open-expo");
+        if (openExpo) openExpo.setAttribute("href", deepLink);
+
+        const webUrl = "BASE_URL_PLACEHOLDER/web";
+        const webQr = new QRCodeStyling({
+          width: 500,
+          height: 500,
+          data: webUrl,
+          image: "/assets/images/icon.png",
+          dotsOptions: { color: "#0b1220", type: "rounded" },
+          backgroundOptions: { color: "#ffffff" },
+          imageOptions: { crossOrigin: "anonymous", margin: 8, imageSize: 0.4, borderRadius: 8 },
+          cornersSquareOptions: { type: "extra-rounded" },
+          cornersDotOptions: { type: "dot" },
+          qrOptions: { errorCorrectionLevel: "H" },
+        });
+        webQr.append(document.getElementById("qr-web"));
+      })();
+    </script>
+  </body>
+</html>
+
+

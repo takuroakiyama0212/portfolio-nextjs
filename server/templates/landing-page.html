@@ -350,12 +350,12 @@
               </div>
 
               <div class="cta">
-                <a href="exps://EXPS_URL_PLACEHOLDER" class="btn btn-primary" id="open-expo">
+                <a href="#" class="btn btn-primary" id="open-expo">
                   <div class="btn-left">
                     <div class="btn-title">Open in Expo Go</div>
                     <div class="btn-sub">Best experience on iOS/Android</div>
                   </div>
-                  <div class="btn-right">exps://</div>
+                  <div class="btn-right" id="expo-scheme-label">exp://</div>
                 </a>
 
                 <a href="BASE_URL_PLACEHOLDER/manifest" class="btn" id="open-manifest">
@@ -414,7 +414,13 @@
         const isIOS =
           /iPhone|iPad|iPod/i.test(ua) ||
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        const deepLink = "exps://EXPS_URL_PLACEHOLDER";
+        const isSecure = window.location.protocol === "https:";
+        const scheme = isSecure ? "exps" : "exp";
+        const deepLink = scheme + "://EXPS_URL_PLACEHOLDER";
+        const openExpo = document.getElementById("open-expo");
+        const schemeLabel = document.getElementById("expo-scheme-label");
+        if (schemeLabel) schemeLabel.textContent = scheme + "://";
+        if (openExpo) openExpo.setAttribute("href", deepLink);
 
         const qrCode = new QRCodeStyling({
           width: 500,

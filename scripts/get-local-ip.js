@@ -23,6 +23,6 @@ function getLocalIPv4() {
   return candidates[0] || "127.0.0.1";
 }
 
-process.stdout.write(getLocalIPv4());
+process.stdout.write(getLocalIPv4() + "\n");
 
 

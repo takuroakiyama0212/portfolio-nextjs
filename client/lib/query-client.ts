@@ -11,9 +11,27 @@ export function getApiUrl(): string {
     throw new Error("EXPO_PUBLIC_DOMAIN is not set");
   }
 
-  let url = new URL(`https://${host}`);
+  // Allow EXPO_PUBLIC_DOMAIN to be either:
+  // - full URL: "http://192.168.1.10:5000" / "https://example.com"
+  // - host:port: "192.168.1.10:5000" / "localhost:5000"
+  const trimmed = host.trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return new URL(trimmed).href;
+  }
 
-  return url.href;
+  const hostname = trimmed.split(":")[0]?.toLowerCase() ?? "";
+
+  // Default to http for local/LAN dev, https for public domains.
+  const isLocalhost =
+    hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
+  const isPrivateIPv4 =
+    /^10\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
+  const isLocalNetwork = isLocalhost || isPrivateIPv4 || hostname.endsWith(".local");
+
+  const protocol = isLocalNetwork ? "http" : "https";
+  return new URL(`${protocol}://${trimmed}`).href;
 }
 
 async function throwIfResNotOk(res: Response) {

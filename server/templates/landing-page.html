@@ -350,52 +350,28 @@
               </div>
 
               <div class="cta">
-                <a href="#" class="btn btn-primary" id="open-expo">
+                <a href="BASE_URL_PLACEHOLDER/web" class="btn btn-primary" id="open-web">
                   <div class="btn-left">
-                    <div class="btn-title">Open in Expo Go</div>
-                    <div class="btn-sub">Best experience on iOS/Android</div>
+                    <div class="btn-title">Open in Web Browser</div>
+                    <div class="btn-sub">Use Charge Spotter in your browser</div>
                   </div>
-                  <div class="btn-right" id="expo-scheme-label">exp://</div>
-                </a>
-
-                <a href="BASE_URL_PLACEHOLDER/manifest" class="btn" id="open-manifest">
-                  <div class="btn-left">
-                    <div class="btn-title">Manifest endpoint</div>
-                    <div class="btn-sub">Useful for debugging</div>
-                  </div>
-                  <div class="btn-right">/manifest</div>
+                  <div class="btn-right">/web</div>
                 </a>
               </div>
 
-              <div class="loading card" id="loading" role="status" aria-live="polite">
-                <div class="card-inner">
-                  <div class="loading-row">
-                    <div class="spinner" aria-hidden="true"></div>
-                    <div>Opening in Expo Go...</div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
           <div class="card">
             <div class="qr-wrap">
               <div class="qr-card">
-                <div class="qr-box" id="qr-code" aria-label="Expo Go QR Code"></div>
+                <div class="qr-box" id="qr-code" aria-label="QR Code"></div>
                 <p class="hint">
-                  Scan this QR code with Expo Go. If you're on mobile, we can try opening the deep link automatically.
+                  Scan this QR code to open Charge Spotter in your web browser. Works on any device with a browser.
                 </p>
                 <div class="row">
-                  <a class="mini" href="https://apps.apple.com/app/id982107779" target="_blank" rel="noreferrer">
-                    <img
-                      src="https://apps.apple.com/assets/images/favicon/favicon-apps-48-fad34e0d87e86dcf72ded1faff4ba9d0.png"
-                      alt=""
-                    />
-                    App Store
-                  </a>
-                  <a class="mini" href="https://play.google.com/store/apps/details?id=host.exp.exponent" target="_blank" rel="noreferrer">
-                    <img src="https://www.gstatic.com/android/market_images/web/favicon_v3.ico" alt="" />
-                    Google Play
+                  <a class="btn btn-primary" href="BASE_URL_PLACEHOLDER/web" id="open-web-btn">
+                    Open Web Version
                   </a>
                 </div>
               </div>
@@ -408,24 +384,12 @@
     <script src="https://unpkg.com/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
     <script>
       (function () {
-        const ua = navigator.userAgent;
-        const loadingEl = document.getElementById("loading");
-        const isAndroid = /Android/i.test(ua);
-        const isIOS =
-          /iPhone|iPad|iPod/i.test(ua) ||
-          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        const isSecure = window.location.protocol === "https:";
-        const scheme = isSecure ? "exps" : "exp";
-        const deepLink = scheme + "://EXPS_URL_PLACEHOLDER";
-        const openExpo = document.getElementById("open-expo");
-        const schemeLabel = document.getElementById("expo-scheme-label");
-        if (schemeLabel) schemeLabel.textContent = scheme + "://";
-        if (openExpo) openExpo.setAttribute("href", deepLink);
-
+        // Web version QR code
+        const webUrl = "BASE_URL_PLACEHOLDER/web";
         const qrCode = new QRCodeStyling({
           width: 500,
           height: 500,
-          data: deepLink,
+          data: webUrl,
           image: "assets/images/icon.png",
           dotsOptions: {
             color: "#0b1220",
@@ -450,18 +414,7 @@
             errorCorrectionLevel: "H",
           },
         });
-
         qrCode.append(document.getElementById("qr-code"));
-
-        if (isAndroid || isIOS) {
-          loadingEl.style.display = "block";
-
-          window.location.href = deepLink;
-
-          setTimeout(function () {
-            loadingEl.style.display = "none";
-          }, 500);
-        }
       })();
     </script>
   </body>

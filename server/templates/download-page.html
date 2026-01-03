@@ -238,7 +238,7 @@
                 </a>
               </div>
               <p class="muted" style="margin-top: 12px">
-                If <code>/web</code> is not built yet, run: <code>npm run web:build</code>
+                If <code>/web</code> is not built yet, run: <code>npm run build:web</code>
               </p>
             </div>
           </div>
@@ -251,7 +251,9 @@
       (function () {
         const isSecure = window.location.protocol === "https:";
         const scheme = isSecure ? "exps" : "exp";
-        const deepLink = scheme + "://EXPS_URL_PLACEHOLDER";
+        // Server replaces METRO_HOST_PORT_PLACEHOLDER with actual Metro host:port (e.g., "192.168.20.6:8081")
+        const metroHostPort = "METRO_HOST_PORT_PLACEHOLDER";
+        const deepLink = scheme + "://" + metroHostPort;
 
         const appQr = new QRCodeStyling({
           width: 500,

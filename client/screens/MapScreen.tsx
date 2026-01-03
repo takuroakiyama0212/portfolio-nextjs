@@ -388,21 +388,21 @@ export default function MapScreen() {
               </View>
             ) : null}
 
-            <FlatList
-              data={filteredSpots}
-              keyExtractor={(item) => item.id}
-              renderItem={renderSpotCard}
-              contentContainerStyle={{ padding: Spacing.lg, paddingBottom: tabBarHeight + Spacing.xl }}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <View style={styles.emptyState}>
-                  <Feather name="search" size={48} color={theme.textSecondary} />
-                  <ThemedText secondary style={{ marginTop: Spacing.md }}>
-                    No charging spots found
-                  </ThemedText>
-                </View>
-              }
-            />
+        <FlatList
+          data={filteredSpots}
+          keyExtractor={(item) => item.id}
+          renderItem={renderSpotCard}
+          contentContainerStyle={{ padding: Spacing.lg, paddingBottom: tabBarHeight + Spacing.xl }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Feather name="search" size={48} color={theme.textSecondary} />
+              <ThemedText secondary style={{ marginTop: Spacing.md }}>
+                No charging spots found
+              </ThemedText>
+            </View>
+          }
+        />
           </View>
         </View>
       </View>

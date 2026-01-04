@@ -38,12 +38,13 @@ const ProjectHighlights = () => {
   },
   {
     id: 3,
-    title: 'Secure.zip',
-    description: 'Enterprise-grade file encryption and secure sharing platform with end-to-end encryption and access controls.',
-    image: "https://img.rocket.new/generatedImages/rocket_gen_img_11004fe63-1764660024095.png",
-    alt: 'Security lock icon overlaid on digital binary code background with blue and green encryption visualization',
+    title: 'Web Security Hub',
+    description: 'End-to-end web security dashboard with monitoring, alerts, and secure sharing controls.',
+    image: "/assets/images/Secure .scrrenshot.png",
+    alt: 'Web Security Hub dashboard showing security monitoring and alerts',
     tags: ['Python', 'AWS', 'Cryptography'],
-    icon: 'LockClosedIcon'
+    icon: 'LockClosedIcon',
+    url: 'https://web-security-hub.vercel.app/'
   },
   {
     id: 4,

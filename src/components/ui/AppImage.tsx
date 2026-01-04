@@ -115,12 +115,12 @@ function AppImage({
 
     if (fill) {
         return (
-            <Image
-                {...imageProps}
-                fill
-                sizes={sizes || '100vw'}
-                style={{ objectFit: 'cover' }}
-            />
+                <Image
+                    {...imageProps}
+                    fill
+                    sizes={sizes || '100vw'}
+                    style={{ objectFit: 'cover' }}
+                />
         );
     }
 

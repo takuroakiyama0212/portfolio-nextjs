@@ -34,7 +34,7 @@ const ProjectHighlights = () => {
     alt: 'Charge Spotter app interface showing Brisbane map with charging spot locations, search bar, category filters, and list view',
     tags: ['Next.js', 'TypeScript', 'Google Maps API'],
     icon: 'BoltIcon',
-    url: 'https://charge-spotter-wjwh-rjm60m0u2-takuro-akiyamas-projects.vercel.app'
+    url: '/charge-spotter-download.html'
   },
   {
     id: 3,
@@ -86,7 +86,8 @@ const ProjectHighlights = () => {
                 <AppImage
                 src={project.image}
                 alt={project.alt}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-500" />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-base"></div>
               </div>

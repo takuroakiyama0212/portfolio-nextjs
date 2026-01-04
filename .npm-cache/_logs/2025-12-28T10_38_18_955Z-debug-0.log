@@ -10,3 +10,9 @@
 9 verbose logfile logs-max:10 dir:/Users/testadmin/Mywebsite/.npm-cache/_logs/2025-12-28T10_38_18_955Z-
 10 verbose logfile /Users/testadmin/Mywebsite/.npm-cache/_logs/2025-12-28T10_38_18_955Z-debug-0.log
 11 silly logfile done cleaning log files
+12 verbose cwd /Users/testadmin/Mywebsite
+13 verbose os Darwin 24.4.0
+14 verbose node v22.16.0
+15 verbose npm  v10.9.2
+16 verbose exit 0
+17 info ok

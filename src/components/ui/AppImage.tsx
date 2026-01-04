@@ -115,14 +115,12 @@ function AppImage({
 
     if (fill) {
         return (
-            <div className={`relative ${className}`}>
-                <Image
-                    {...imageProps}
-                    fill
-                    sizes={sizes || '100vw'}
-                    style={{ objectFit: 'cover' }}
-                />
-            </div>
+            <Image
+                {...imageProps}
+                fill
+                sizes={sizes || '100vw'}
+                style={{ objectFit: 'cover' }}
+            />
         );
     }
 

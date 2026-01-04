@@ -29,7 +29,7 @@ const ProjectHighlights = () => {
   {
     id: 2,
     title: 'Charge Spotter',
-    description: 'Real-time EV charging station locator with availability tracking and route optimization for electric vehicle drivers.',
+    description: 'Instantly find charging outlets near you. Know exactly where to charge your phone or device, even when your battery is low.',
     image: "/assets/images/charge-spotter.png",
     alt: 'Charge Spotter app interface showing Brisbane map with charging spot locations, search bar, category filters, and list view',
     tags: ['Next.js', 'TypeScript', 'Google Maps API'],
@@ -87,6 +87,7 @@ const ProjectHighlights = () => {
                 src={project.image}
                 alt={project.alt}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover group-hover:scale-110 transition-transform duration-500" />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-base"></div>

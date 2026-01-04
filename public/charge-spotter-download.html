@@ -193,50 +193,33 @@
             <div class="logo"><img src="/assets/images/icon.png" alt="" /></div>
             <div>
               <h1>Charge Spotter</h1>
-              <p class="subtitle">Download and open on phone, or use the web version.</p>
+              <p class="subtitle">Scan once to open the Charge Spotter web app.</p>
             </div>
           </div>
           <a class="mini" href="/" style="justify-self: end">Back</a>
         </div>
 
-        <div class="grid">
-          <div class="card">
-            <div class="card-inner">
-              <div class="kicker">Open on phone (Expo Go)</div>
-              <p class="muted">
-                Scan the QR code in Expo Go. On LAN (http) we use <code>exp://</code>, and on HTTPS we use <code>exps://</code>.
-              </p>
-              <div class="qr-box" id="qr-app" aria-label="Expo Go QR Code"></div>
-              <div class="row">
-                <a class="btn btn-primary" id="open-expo" href="#">
-                  Open in Expo Go
-                </a>
-              </div>
-              <div class="row">
-                <a class="mini" href="https://apps.apple.com/app/id982107779" target="_blank" rel="noreferrer">
-                  <img src="https://apps.apple.com/assets/images/favicon/favicon-apps-48-fad34e0d87e86dcf72ded1faff4ba9d0.png" alt="" />
-                  App Store
-                </a>
-                <a class="mini" href="https://play.google.com/store/apps/details?id=host.exp.exponent" target="_blank" rel="noreferrer">
-                  <img src="https://www.gstatic.com/android/market_images/web/favicon_v3.ico" alt="" />
-                  Google Play
-                </a>
-              </div>
+        <div class="card">
+          <div class="card-inner" style="text-align: center">
+            <div class="kicker">Open Charge Spotter</div>
+            <p class="muted">
+              Scan the QR code below to open the web version. Works in any browser—no app install required.
+            </p>
+            <div class="qr-box" id="qr-web" aria-label="Charge Spotter Web QR Code"></div>
+            <div class="row" style="justify-content: center; margin-top: 16px">
+              <a class="btn btn-primary" id="open-web" href="https://charge-spotter-wjwh-rjm60m0u2-takuro-akiyamas-projects.vercel.app/">
+                Open web version
+              </a>
             </div>
-          </div>
-
-          <div class="card">
-            <div class="card-inner">
-              <div class="kicker">Open in web browser</div>
-              <p class="muted">
-                This link opens the web build when available. If you are in dev mode, make sure Expo is running with web enabled.
-              </p>
-              <div class="qr-box" id="qr-web" aria-label="Web QR Code"></div>
-              <div class="row">
-                <a class="btn btn-primary" id="open-web" href="https://charge-spotter-wjwh-rjm60m0u2-takuro-akiyamas-projects.vercel.app/">
-                  Open web version
-                </a>
-              </div>
+            <div class="row" style="justify-content: center">
+              <a class="mini" href="https://apps.apple.com/app/id982107779" target="_blank" rel="noreferrer">
+                <img src="https://apps.apple.com/assets/images/favicon/favicon-apps-48-fad34e0d87e86dcf72ded1faff4ba9d0.png" alt="" />
+                App Store
+              </a>
+              <a class="mini" href="https://play.google.com/store/apps/details?id=host.exp.exponent" target="_blank" rel="noreferrer">
+                <img src="https://www.gstatic.com/android/market_images/web/favicon_v3.ico" alt="" />
+                Google Play
+              </a>
             </div>
           </div>
         </div>
@@ -246,25 +229,7 @@
     <script src="https://unpkg.com/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
     <script>
       (function () {
-        const appDeepLink = "https://charge-spotter-wjwh-rjm60m0u2-takuro-akiyamas-projects.vercel.app/";
         const webUrl = "https://charge-spotter-wjwh-rjm60m0u2-takuro-akiyamas-projects.vercel.app/";
-
-        const appQr = new QRCodeStyling({
-          width: 500,
-          height: 500,
-          data: appDeepLink,
-          image: "/assets/images/icon.png",
-          dotsOptions: { color: "#0b1220", type: "rounded" },
-          backgroundOptions: { color: "#ffffff" },
-          imageOptions: { crossOrigin: "anonymous", margin: 8, imageSize: 0.4, borderRadius: 8 },
-          cornersSquareOptions: { type: "extra-rounded" },
-          cornersDotOptions: { type: "dot" },
-          qrOptions: { errorCorrectionLevel: "H" },
-        });
-        appQr.append(document.getElementById("qr-app"));
-
-        const openExpo = document.getElementById("open-expo");
-        if (openExpo) openExpo.setAttribute("href", appDeepLink);
 
         const webQr = new QRCodeStyling({
           width: 500,
@@ -279,6 +244,9 @@
           qrOptions: { errorCorrectionLevel: "H" },
         });
         webQr.append(document.getElementById("qr-web"));
+
+        const openWeb = document.getElementById("open-web");
+        if (openWeb) openWeb.setAttribute("href", webUrl);
       })();
     </script>
   </body>

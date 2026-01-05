@@ -55,6 +55,16 @@ const ProjectHighlights = () => {
     tags: ['JavaScript', 'Chrome Extension', 'YouTube API'],
     icon: 'LanguageIcon',
     url: 'https://takuroakiyama0212.github.io/my-youtube-dual-subtitle/'
+  },
+  {
+    id: 5,
+    title: 'Weather Atmosphere',
+    description: 'Check weather and air conditions anywhere in the world with a fast, searchable dashboard.',
+    image: "/assets/images/Weather.png",
+    alt: 'Weather Atmosphere UI showing a city search bar and a weather card for Tokyo, Japan',
+    tags: ['Next.js', 'TypeScript', 'Weather API'],
+    icon: 'CloudIcon',
+    url: 'https://weather-atmosphere.vercel.app/'
   }];
 
 

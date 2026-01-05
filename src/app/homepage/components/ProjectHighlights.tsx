@@ -69,6 +69,16 @@ const ProjectHighlights = ({ showAll = false }: ProjectHighlightsProps) => {
     tags: ['Next.js', 'TypeScript', 'Weather API'],
     icon: 'CloudIcon',
     url: 'https://weather-atmosphere.vercel.app/'
+  },
+  {
+    id: 6,
+    title: 'Celebrity Image Classifier',
+    description: 'AI-powered celebrity recognition system that identifies which famous person you resemble most using advanced computer vision.',
+    image: "/assets/images/Face-1.png",
+    alt: 'Celebrity Image Classifier interface showing face recognition and celebrity matching results',
+    tags: ['Python', 'Streamlit', 'OpenAI API'],
+    icon: 'FaceSmileIcon',
+    url: 'https://celeb-identify-jjjjcadr2qpd5caraetzir.streamlit.app/'
   }];
 
   const displayedProjects = showAll ? featuredProjects : featuredProjects.slice(0, 4);

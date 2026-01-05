@@ -57,6 +57,27 @@ const AboutSection = () => {
       effort: '≈ 300 hours',
       verifyUrl: 'https://freecodecamp.org/certification/takuroakiyama0212/javascript-v9',
     },
+    {
+      issuer: 'Google',
+      title: 'Foundations of Cybersecurity',
+      date: 'Aug 28, 2025',
+      effort: '≈ 9 hours',
+      verifyUrl: 'https://www.coursera.org/account/accomplishments/verify/LRCATFKXGDL7',
+    },
+    {
+      issuer: 'Coursera',
+      title: 'Google Cybersecurity Professional Certificate',
+      date: '2025',
+      effort: 'Professional Certificate',
+      verifyUrl: 'https://www.coursera.org/account/accomplishments/professional-cert/certificate/S0AN3RD1UG7W',
+    },
+    {
+      issuer: 'Coursera',
+      title: 'Cybersecurity Specialization',
+      date: '2025',
+      effort: 'Specialization',
+      verifyUrl: 'https://www.coursera.org/account/accomplishments/specialization/5IJ62F5PUNVR',
+    },
   ];
 
   return (

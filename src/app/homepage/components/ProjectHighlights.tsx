@@ -36,7 +36,7 @@ const ProjectHighlights = ({ showAll = false }: ProjectHighlightsProps) => {
     description: 'Instantly find charging outlets near you. Know exactly where to charge your phone or device, even when your battery is low.',
     image: "/assets/images/charge-spotter.png",
     alt: 'Charge Spotter app interface showing Brisbane map with charging spot locations, search bar, category filters, and list view',
-    tags: ['Next.js', 'TypeScript', 'Google Maps API'],
+    tags: ['React Native', 'TypeScript', 'Express.js (BackEnd)', 'react-native-maps / Leaflet (map)'],
     icon: 'BoltIcon',
     url: '/charge-spotter-download.html'
   },
@@ -46,7 +46,7 @@ const ProjectHighlights = ({ showAll = false }: ProjectHighlightsProps) => {
     description: 'End-to-end web security dashboard with monitoring, alerts, and secure sharing controls.',
     image: "/assets/images/Secure .scrrenshot.png",
     alt: 'Web Security Hub dashboard showing security monitoring and alerts',
-    tags: ['Python', 'AWS', 'Cryptography'],
+    tags: ['JavaScript', 'API Security', 'Docker'],
     icon: 'LockClosedIcon',
     url: 'https://web-security-hub.vercel.app/'
   },
@@ -165,12 +165,12 @@ const ProjectHighlights = ({ showAll = false }: ProjectHighlightsProps) => {
               <Icon name="ArrowLeftIcon" size={20} />
             </Link>
           ) : (
-            <Link
-              href="/projects-showcase"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 hover:shadow-elevation hover:-translate-y-1 transition-all duration-base">
-              View All Projects
-              <Icon name="ArrowRightIcon" size={20} />
-            </Link>
+          <Link
+            href="/projects-showcase"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 hover:shadow-elevation hover:-translate-y-1 transition-all duration-base">
+            View All Projects
+            <Icon name="ArrowRightIcon" size={20} />
+          </Link>
           )}
         </div>
       </div>

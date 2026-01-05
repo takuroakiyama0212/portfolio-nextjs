@@ -152,28 +152,28 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
               </div>
 
               {/* Code Content */}
-              <div className="p-4 sm:p-6 pb-16 sm:pb-20 space-y-3 font-mono text-xs sm:text-sm min-h-[260px] sm:min-h-[300px] bg-gradient-to-br from-brand-primary to-brand-primary/90 overflow-hidden">
+              <div className="p-4 sm:p-6 pb-16 sm:pb-20 space-y-3 font-mono text-xs sm:text-sm min-h-[260px] sm:min-h-[300px] bg-gradient-to-br from-brand-primary to-brand-primary/90 overflow-x-auto">
                 {isHydrated ?
                 <>
                     {codeSnippets.map((line, index) =>
                   <div
                     key={index}
-                    className={`transition-all duration-500 ${
+                    className={`transition-all duration-500 whitespace-nowrap ${
                     index === codeLineIndex ?
                     'text-accent opacity-100 scale-105' : 'text-text-secondary/60 opacity-70'}`
                     }>
 
                         <span className="text-text-secondary/40 mr-3">{index + 1}</span>
-                        <span className="break-all">{line}</span>
+                        <span>{line}</span>
                       </div>
                   )}
                   </> :
 
                 <>
                     {codeSnippets.map((line, index) =>
-                  <div key={index} className="text-text-secondary/60 opacity-70">
+                  <div key={index} className="text-text-secondary/60 opacity-70 whitespace-nowrap">
                         <span className="text-text-secondary/40 mr-3">{index + 1}</span>
-                        <span className="break-all">{line}</span>
+                        <span>{line}</span>
                       </div>
                   )}
                   </>

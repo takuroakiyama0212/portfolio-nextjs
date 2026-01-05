@@ -8,7 +8,7 @@ export default function ProjectsShowcasePage() {
     <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <ProjectHighlights />
+        <ProjectHighlights showAll />
       </main>
       <Footer />
     </div>

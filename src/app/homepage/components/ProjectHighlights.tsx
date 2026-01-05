@@ -14,7 +14,11 @@ interface Project {
   url?: string;
 }
 
-const ProjectHighlights = () => {
+interface ProjectHighlightsProps {
+  showAll?: boolean;
+}
+
+const ProjectHighlights = ({ showAll = false }: ProjectHighlightsProps) => {
   const featuredProjects: Project[] = [
   {
     id: 1,
@@ -67,6 +71,7 @@ const ProjectHighlights = () => {
     url: 'https://weather-atmosphere.vercel.app/'
   }];
 
+  const displayedProjects = showAll ? featuredProjects : featuredProjects.slice(0, 4);
 
   return (
     <section className="py-20 lg:py-32 bg-background">
@@ -87,7 +92,7 @@ const ProjectHighlights = () => {
 
         {/* Projects Grid */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {featuredProjects.map((project) =>
+          {displayedProjects.map((project) =>
           <div
             key={project.id}
             className="group bg-surface rounded-2xl overflow-hidden border border-border hover:border-primary hover:shadow-elevation transition-all duration-base">
@@ -150,15 +155,23 @@ const ProjectHighlights = () => {
           )}
         </div>
 
-        {/* View All Projects CTA */}
+        {/* CTA */}
         <div className="text-center">
-          <Link
-            href="/projects-showcase"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 hover:shadow-elevation hover:-translate-y-1 transition-all duration-base">
-
-            View All Projects
-            <Icon name="ArrowRightIcon" size={20} />
-          </Link>
+          {showAll ? (
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 hover:shadow-elevation hover:-translate-y-1 transition-all duration-base">
+              Back to homepage
+              <Icon name="ArrowLeftIcon" size={20} />
+            </Link>
+          ) : (
+            <Link
+              href="/projects-showcase"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 hover:shadow-elevation hover:-translate-y-1 transition-all duration-base">
+              View All Projects
+              <Icon name="ArrowRightIcon" size={20} />
+            </Link>
+          )}
         </div>
       </div>
     </section>);

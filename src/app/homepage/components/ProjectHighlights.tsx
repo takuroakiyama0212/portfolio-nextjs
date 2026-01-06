@@ -79,6 +79,16 @@ const ProjectHighlights = ({ showAll = false }: ProjectHighlightsProps) => {
     tags: ['Python', 'Streamlit', 'OpenAI API'],
     icon: 'FaceSmileIcon',
     url: 'https://celeb-identify-jjjjcadr2qpd5caraetzir.streamlit.app/'
+  },
+  {
+    id: 7,
+    title: 'Chat App',
+    description: 'Connect and chat with anyone in real-time. Send messages instantly and stay connected with friends, colleagues, and communities.',
+    image: "/assets/images/chat-app.png",
+    alt: 'Chat App interface showing login screen and messaging interface',
+    tags: ['TypeScript (Node.js)', 'Python (FastAPI/Django + WebSocket)', 'Go (Gin/Fiber + WebSocket)', 'Java (Spring Boot + WebSocket)'],
+    icon: 'ChatBubbleLeftRightIcon',
+    url: 'https://chat-app-kl9q.onrender.com/'
   }];
 
   const displayedProjects = showAll ? featuredProjects : featuredProjects.slice(0, 4);

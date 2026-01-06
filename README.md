@@ -116,7 +116,19 @@ Built with ❤️ on Rocket.new
 
 ## 📝 Recent Changes
 
-### CarSwipe Demo Integration (Latest Update)
+### Chat App Project Added (Latest Update)
+- Added new "Chat App" project to the portfolio
+- Project image: `public/assets/images/chat-app.png`
+- Project URL: `https://chat-app-kl9q.onrender.com/`
+- Technologies: TypeScript (Node.js), Python (FastAPI/Django + WebSocket), Go (Gin/Fiber + WebSocket), Java (Spring Boot + WebSocket)
+- Description: Real-time messaging application that allows users to connect and chat with anyone instantly
+
+**Modified Files:**
+- `src/app/homepage/components/ProjectHighlights.tsx`
+  - Added Chat App project (id: 7) with image, description, tags, and external URL
+  - Project appears in both homepage (4 projects view) and projects showcase (all projects view)
+
+### CarSwipe Demo Integration
 
 **Added Files:**
 - `public/demo.html` - CarSwipe demo page with features, how-it-works section, and QR code modal

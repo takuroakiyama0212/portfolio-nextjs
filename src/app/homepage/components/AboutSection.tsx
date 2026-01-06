@@ -11,17 +11,6 @@ const AboutSection = () => {
     "I am currently based in Australia and studying Computer Science in University of the People on online.",
   ];
 
-  const projectHighlights = [
-    {
-      title: "Auto Matcher",
-      tech: "React, TypeScript, Node.js, Express, PostgreSQL, TanStack Query",
-      description: "Built a full-stack matching application with real-time data synchronization.",
-      details: [
-        "Implemented RESTful API with Express and PostgreSQL for data persistence.",
-        "Created responsive UI components using React and Tailwind CSS.",
-      ],
-    },
-  ];
 
   const techStack = [
     { name: 'React', color: 'bg-cyan-400' },
@@ -94,20 +83,6 @@ const AboutSection = () => {
               </p>
             ))}
           </div>
-
-          {/* Project Highlights */}
-          {projectHighlights.map((project, index) => (
-            <div key={index} className="mt-8 p-6 bg-surface rounded-xl border border-border">
-              <h3 className="text-xl font-bold text-text-primary mb-2">{project.title}</h3>
-              <p className="text-sm text-text-secondary mb-3 font-medium">{project.tech}</p>
-              <p className="text-text-secondary mb-3">{project.description}</p>
-              <ul className="list-disc list-inside space-y-1 text-text-secondary text-sm">
-                {project.details.map((detail, detailIndex) => (
-                  <li key={detailIndex}>{detail}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
         </div>
 
         {/* Contact & Socials (combined) */}

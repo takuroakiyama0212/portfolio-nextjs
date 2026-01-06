@@ -37,7 +37,8 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
 
   const stats = [
   { value: '5+', label: 'Years Experience' },
-  { value: '10+', label: 'Projects Completed' }];
+  { value: '10+', label: 'Projects Completed' },
+  { value: 'Certified Professional', label: 'AWS, Google Cloud, and multiple development certifications', emphasis: true }];
 
 
   return (
@@ -193,7 +194,7 @@ const HeroSection = ({ onViewProjects, onDownloadResume }: HeroSectionProps) => 
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 gap-6 mt-20 lg:mt-32">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-20 lg:mt-32">
           {stats.map((stat, index) =>
           <div
             key={index}

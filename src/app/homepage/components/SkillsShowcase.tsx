@@ -164,16 +164,6 @@ const SkillsShowcase = () => {
           </div>
         </div>
 
-        {/* Certifications Badge */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-4 bg-success/10 border border-success/20 rounded-xl">
-            <Icon name="CheckBadgeIcon" size={24} className="text-success" />
-            <div className="text-left">
-              <p className="text-sm font-semibold text-text-primary">Certified Professional</p>
-              <p className="text-xs text-text-secondary">AWS, Google Cloud, and multiple development certifications</p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

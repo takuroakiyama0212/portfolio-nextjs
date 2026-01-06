@@ -32,6 +32,8 @@ const AboutSection = () => {
     { name: 'Machine Learning', color: 'bg-purple-500' },
     { name: 'Next.js', color: 'bg-gray-800' },
     { name: 'Weather API', color: 'bg-sky-500' },
+    { name: 'PostgreSQL', color: 'bg-blue-700' },
+    { name: 'Postman', color: 'bg-orange-500' },
   ];
 
   const certifications = [

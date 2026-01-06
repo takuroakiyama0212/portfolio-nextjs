@@ -23,14 +23,13 @@ const Footer = () => {
     projects: [
       { label: 'Auto Matcher', href: '/projects-showcase' },
       { label: 'Charge Spotter', href: '/projects-showcase' },
-      { label: 'Secure.zip', href: '/projects-showcase' },
+      { label: 'Web Security Hub', href: '/projects-showcase' },
       { label: 'YouTube Dual Subtitle', href: '/projects-showcase' },
     ],
     resources: [
       { label: 'Resume', href: '#resume' },
       { label: 'GitHub', href: 'https://github.com/takuroakiyama0212' },
       { label: 'LinkedIn', href: 'https://www.linkedin.com/in/takuroakiyama0212' },
-      { label: 'Blog', href: '#blog' },
     ],
   };
 
@@ -138,14 +137,6 @@ const Footer = () => {
                 <>© Takuro. All rights reserved.</>
               )}
             </p>
-            <div className="flex items-center gap-6">
-              <a href="#privacy" className="text-sm text-brand-primary-foreground/60 hover:text-brand-primary-foreground transition-colors duration-base">
-                Privacy Policy
-              </a>
-              <a href="#terms" className="text-sm text-brand-primary-foreground/60 hover:text-brand-primary-foreground transition-colors duration-base">
-                Terms of Service
-              </a>
-            </div>
           </div>
         </div>
       </div>

@@ -23,6 +23,8 @@ const SkillsShowcase = () => {
       color: 'text-brand-secondary',
       skills: [
         { name: 'React', icon: 'CodeBracketIcon', proficiency: 90, category: 'frontend' },
+        { name: 'Next.js', icon: 'GlobeAltIcon', proficiency: 88, category: 'frontend' },
+        { name: 'React Native', icon: 'DevicePhoneMobileIcon', proficiency: 84, category: 'frontend' },
         { name: 'TypeScript', icon: 'DocumentTextIcon', proficiency: 85, category: 'frontend' },
         { name: 'HTML5', icon: 'CodeBracketSquareIcon', proficiency: 88, category: 'frontend' },
         { name: 'CSS3', icon: 'PaintBrushIcon', proficiency: 87, category: 'frontend' },
@@ -38,6 +40,8 @@ const SkillsShowcase = () => {
         { name: 'Python', icon: 'CodeBracketSquareIcon', proficiency: 88, category: 'backend' },
         { name: 'Express.js', icon: 'ServerIcon', proficiency: 82, category: 'backend' },
         { name: 'Flask', icon: 'ServerIcon', proficiency: 80, category: 'backend' },
+        { name: 'FastAPI', icon: 'BoltIcon', proficiency: 82, category: 'backend' },
+        { name: 'WebSocket', icon: 'CloudArrowUpIcon', proficiency: 80, category: 'backend' },
         { name: 'PHP', icon: 'CodeBracketIcon', proficiency: 75, category: 'backend' },
         { name: 'Java', icon: 'CodeBracketSquareIcon', proficiency: 78, category: 'backend' },
       ],
@@ -48,6 +52,7 @@ const SkillsShowcase = () => {
       color: 'text-cta',
       skills: [
         { name: 'PostgreSQL', icon: 'CircleStackIcon', proficiency: 85, category: 'database' },
+        { name: 'MongoDB', icon: 'CircleStackIcon', proficiency: 86, category: 'database' },
         { name: 'MySQL', icon: 'CircleStackIcon', proficiency: 82, category: 'database' },
         { name: 'AWS', icon: 'CloudIcon', proficiency: 80, category: 'cloud' },
         { name: 'Google Cloud', icon: 'CloudIcon', proficiency: 75, category: 'cloud' },
@@ -63,6 +68,7 @@ const SkillsShowcase = () => {
         { name: 'NumPy', icon: 'ChartBarIcon', proficiency: 80, category: 'ml' },
         { name: 'Pandas', icon: 'TableCellsIcon', proficiency: 82, category: 'ml' },
         { name: 'Matplotlib', icon: 'ChartBarIcon', proficiency: 78, category: 'ml' },
+        { name: 'OpenAI API', icon: 'SparklesIcon', proficiency: 83, category: 'ml' },
       ],
     },
     {
@@ -73,7 +79,9 @@ const SkillsShowcase = () => {
         { name: 'Git', icon: 'CommandLineIcon', proficiency: 90, category: 'tools' },
         { name: 'GitHub', icon: 'CodeBracketIcon', proficiency: 92, category: 'tools' },
         { name: 'React Query', icon: 'ArrowPathIcon', proficiency: 85, category: 'tools' },
-        { name: 'Adobe Lightroom', icon: 'PhotoIcon', proficiency: 75, category: 'tools' },
+        { name: 'Docker', icon: 'CubeTransparentIcon', proficiency: 88, category: 'tools' },
+        { name: 'Postman', icon: 'PaperAirplaneIcon', proficiency: 80, category: 'tools' },
+        { name: 'Streamlit', icon: 'PresentationChartBarIcon', proficiency: 82, category: 'tools' },
       ],
     },
   ];

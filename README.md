@@ -73,24 +73,24 @@ This project uses Tailwind CSS for styling with the following features:
 
 ## 📱 Deployment
 
-### 公開URL（他の人がアクセスできるURL）を作る方法
+### Creating a Public URL (How to Make Your Site Accessible to Others)
 
-#### Vercel（おすすめ・最短）
-- GitHub にこのプロジェクトを push
-- Vercel にログイン → 「New Project」→ リポジトリを選択
-- Framework: Next.js（自動認識）
-- Deploy を押す
-- 数分後に **`https://xxxxx.vercel.app`** が発行され、そのURLを共有すれば他の人も見られます
+#### Vercel (Recommended & Fastest)
+- Push this project to GitHub
+- Log in to Vercel → "New Project" → Select your repository
+- Framework: Next.js (automatically detected)
+- Click "Deploy"
+- After a few minutes, **`https://xxxxx.vercel.app`** will be issued, and you can share this URL so others can view it
 
 #### Netlify
-- GitHub に push
-- Netlify → 「Add new site」→ 「Import an existing project」
+- Push to GitHub
+- Netlify → "Add new site" → "Import an existing project"
 - Build command: `npm run build`
 - Publish directory: `.next`
-- `netlify.toml` を追加済みなので、基本は自動で動きます
+- `netlify.toml` is already included, so it should work automatically
 
-### ローカルで本番起動する
-このプロジェクトは本番用に `npm run start`（= `next start`）を使います。
+### Running Production Build Locally
+This project uses `npm run start` (= `next start`) for production builds.
 
   ```bash
   npm run build

@@ -3,6 +3,7 @@
 This repository contains a personal portfolio built with **Next.js 14**, **React 18**, **TypeScript**, and **Tailwind CSS**. It showcases projects, skills, certifications, and contact options, plus standalone demo/download pages for featured apps.
 
 ## What’s Included
+- Live site: https://portfolio-nextjs-three-sepia.vercel.app/homepage
 - Homepage with hero, stats, resume download, and featured projects (4 shown on home; full list on `/projects-showcase`)
 - Project cards for:
   - Auto Matcher (demo at `/demo.html`)
@@ -16,6 +17,13 @@ This repository contains a personal portfolio built with **Next.js 14**, **React
 - Contact CTA that opens the default mail client to `akiyamatakuro0212@gmail.com`
 - Static assets in `public/assets/images/`
 - Resume files: `public/TakuroAkiyama-resume1.pdf` (current), `public/TakuroAkiyama-resume.pdf` (legacy)
+
+## Top 5 Skills Used (also visible in the Skills section)
+- Next.js (App Router, SSR/SSG)
+- React 18 + TypeScript
+- Tailwind CSS (responsive UI)
+- Node.js / Express-style backend patterns
+- API integration & deployment (Vercel/Netlify)
 
 ## Quick Start
 1) Install

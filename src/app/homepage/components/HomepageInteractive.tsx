@@ -27,8 +27,8 @@ const HomepageInteractive = () => {
     // Download resume from public/
     if (isHydrated) {
       const link = document.createElement('a');
-      link.href = '/TakuroAkiyama-resume1.pdf';
-      link.download = 'TakuroAkiyama-resume1.pdf';
+      link.href = '/TakuroAkiyamaresume.pdf';
+      link.download = 'TakuroAkiyamaresume.pdf';
       link?.click();
     }
   };

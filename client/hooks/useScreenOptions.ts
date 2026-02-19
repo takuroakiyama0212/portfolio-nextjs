@@ -9,13 +9,15 @@ interface UseScreenOptionsParams {
 }
 
 export function useScreenOptions({
-  transparent = true,
+  transparent = false,
 }: UseScreenOptionsParams = {}): NativeStackNavigationOptions {
   const { theme, isDark } = useTheme();
 
   return {
     headerTitleAlign: "center",
     headerTransparent: transparent,
+    statusBarTranslucent: false,
+    statusBarColor: theme.backgroundRoot,
     headerBlurEffect: isDark ? "dark" : "light",
     headerTintColor: theme.text,
     headerStyle: {

@@ -2,12 +2,11 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { Platform, StyleSheet, View } from "react-native";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { Platform, StyleSheet } from "react-native";
 import MapStackNavigator from "@/navigation/MapStackNavigator";
 import ListStackNavigator from "@/navigation/ListStackNavigator";
+import AddSpotStackNavigator from "@/navigation/AddSpotStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
-import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 export type MainTabParamList = {
   MapTab: undefined;
@@ -17,13 +16,8 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-function AddSpotPlaceholder() {
-  return <View />;
-}
-
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
-  const rootNavigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   return (
     <Tab.Navigator
@@ -63,18 +57,13 @@ export default function MainTabNavigator() {
       />
       <Tab.Screen
         name="AddSpotTab"
-        component={AddSpotPlaceholder}
-        listeners={() => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            rootNavigation.navigate("AddSpot");
-          },
-        })}
+        component={AddSpotStackNavigator}
         options={{
           title: "Add Spot",
           tabBarIcon: ({ color, size }) => (
             <Feather name="plus-circle" size={size + 4} color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tab.Screen

@@ -86,7 +86,7 @@ export default function LocationDetailsScreen() {
         <View style={styles.content}>
           <View style={styles.headerRow}>
             <View style={styles.venueTag}>
-              <ThemedText style={styles.venueTagText}>
+              <ThemedText style={styles.venueTagText} numberOfLines={1}>
                 {VENUE_TYPE_LABELS[spot.venueType]}
               </ThemedText>
             </View>
@@ -142,7 +142,7 @@ export default function LocationDetailsScreen() {
             <View style={styles.row}>
               <Feather name="zap" size={18} color="#4CAF50" />
               <ThemedText style={styles.rowText}>
-                {spot.outletCount} outlets (reported)
+                {`${spot.outletCount ?? 0} outlets`}
               </ThemedText>
             </View>
 
@@ -177,7 +177,7 @@ export default function LocationDetailsScreen() {
               onPress={() => Linking.openURL(googleMapsUrl(spot.latitude, spot.longitude, spot.name))}
             >
               <Feather name="navigation" size={16} color="#ffffff" />
-              <ThemedText style={styles.actionPrimaryText}>Open in Google Maps</ThemedText>
+              <ThemedText style={[styles.actionPrimaryText, { textAlign: "center" }]}>Open in Google Maps</ThemedText>
             </Pressable>
           </View>
         </View>
@@ -213,6 +213,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     borderWidth: 1,
     borderColor: "rgba(76,175,80,0.35)",
+    minWidth: 100,
+    alignItems: "center",
     backgroundColor: "rgba(76,175,80,0.12)",
   },
   venueTagText: { color: "#4CAF50", fontSize: 12, fontWeight: "700" },
@@ -238,7 +240,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
+    width: "100%",
   },
   actionPrimary: { backgroundColor: "#4CAF50" },
   actionPrimaryText: { color: "#ffffff", fontWeight: "800", marginLeft: Spacing.sm },

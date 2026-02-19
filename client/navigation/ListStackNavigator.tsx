@@ -20,7 +20,7 @@ export default function ListStackNavigator() {
         name="List"
         component={ListScreen}
         options={{
-          headerTitle: "Charge Spotter",
+          headerTitle: "Charge Spot",
         }}
       />
       <Stack.Screen

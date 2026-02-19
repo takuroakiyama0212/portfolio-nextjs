@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
+  Text,
   TextInput,
   Pressable,
   Platform,
@@ -9,6 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 let MapView: any = null;
 let Marker: any = null;
@@ -23,20 +25,30 @@ if (Platform.OS !== "web") {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
-import { HeaderButton } from "@react-navigation/elements";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
 import { VenueType, OutletType, VENUE_TYPE_LABELS, OUTLET_TYPE_LABELS } from "@/data/mockData";
+import { apiRequest } from "@/lib/query-client";
 
 const VENUE_TYPES: VenueType[] = ["cafe", "library", "airport", "mall", "restaurant", "hotel", "coworking"];
-const OUTLET_TYPES: OutletType[] = ["usb-a", "usb-c", "standard"];
+const OUTLET_TYPES: OutletType[] = ["usb-a", "usb-c", "standard", "other"];
+const OUTLET_TYPE_SHORT_LABELS: Record<OutletType, string> = {
+  "usb-a": "USB-A",
+  "usb-c": "USB-C",
+  standard: "STD",
+  other: "Other",
+};
+const DAILY_OUTLET_ADD_LIMIT = 10;
+const OUTLET_ADD_LIMIT_STORAGE_KEY = "outlet-add-limit";
 
 export default function AddSpotScreen() {
   const { theme } = useTheme();
+  const { userEmail } = useAuth();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -47,32 +59,83 @@ export default function AddSpotScreen() {
   const [notes, setNotes] = useState("");
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [dailyAddCount, setDailyAddCount] = useState(0);
 
-  const isFormValid = venueName.trim().length > 0 && venueType !== null && selectedOutletTypes.length > 0;
+  const hasOtherSelected = selectedOutletTypes.includes("other");
+  const isFormValid = venueName.trim().length > 0 && venueType !== null && selectedOutletTypes.length > 0 && (!hasOtherSelected || notes.trim().length > 0);
 
   useEffect(() => {
-    getUserLocation();
+    initializeScreen();
     navigation.setOptions({
+      headerTitle: "Add Spot",
+      headerTitleAlign: "center",
+      headerLeftContainerStyle: { paddingLeft: Spacing.sm },
+      headerRightContainerStyle: { paddingRight: Spacing.sm },
       headerLeft: () => (
-        <HeaderButton onPress={() => navigation.goBack()}>
-          <ThemedText type="link">Cancel</ThemedText>
-        </HeaderButton>
+        <Pressable onPress={() => navigation.goBack()} style={styles.headerActionButton}>
+          <Text allowFontScaling={false} maxFontSizeMultiplier={1} style={[styles.headerActionText, { color: theme.primary }]}>
+            Back
+          </Text>
+        </Pressable>
       ),
       headerRight: () => (
-        <HeaderButton
+        <Pressable
           onPress={handleSubmit}
           disabled={!isFormValid}
+          style={[
+            styles.submitHeaderButton,
+            {
+              backgroundColor: isFormValid ? theme.primary : theme.border,
+            },
+          ]}
         >
-          <ThemedText
-            type="link"
-            style={{ opacity: isFormValid ? 1 : 0.5 }}
-          >
-            Submit
-          </ThemedText>
-        </HeaderButton>
+          <Text allowFontScaling={false} maxFontSizeMultiplier={1} style={styles.submitHeaderButtonText}>
+            Save
+          </Text>
+        </Pressable>
       ),
     });
-  }, [isFormValid, venueName, venueType, outletCount, selectedOutletTypes, notes]);
+  }, [isFormValid, venueName, venueType, outletCount, selectedOutletTypes, notes, userEmail, theme]);
+
+  const getTodayKey = () => new Date().toISOString().slice(0, 10);
+
+  const readDailyCounter = async () => {
+    try {
+      const raw = await AsyncStorage.getItem(OUTLET_ADD_LIMIT_STORAGE_KEY);
+      const today = getTodayKey();
+      if (!raw) {
+        return { date: today, count: 0 };
+      }
+      const parsed = JSON.parse(raw) as { date?: string; count?: number };
+      if (parsed.date !== today) {
+        return { date: today, count: 0 };
+      }
+      return { date: today, count: Math.max(0, Number(parsed.count ?? 0)) };
+    } catch (error) {
+      console.log("Error reading outlet add limit state:", error);
+      return { date: getTodayKey(), count: 0 };
+    }
+  };
+
+  const saveDailyCounter = async (count: number) => {
+    try {
+      await AsyncStorage.setItem(
+        OUTLET_ADD_LIMIT_STORAGE_KEY,
+        JSON.stringify({ date: getTodayKey(), count })
+      );
+    } catch (error) {
+      console.log("Error saving outlet add limit state:", error);
+    }
+  };
+
+  const initializeScreen = async () => {
+    await Promise.all([getUserLocation(), loadDailyAddCount()]);
+  };
+
+  const loadDailyAddCount = async () => {
+    const state = await readDailyCounter();
+    setDailyAddCount(state.count);
+  };
 
   const getUserLocation = async () => {
     if (Platform.OS === "web") {
@@ -104,13 +167,57 @@ export default function AddSpotScreen() {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isFormValid) return;
-    
+    if (!userEmail) {
+      Alert.alert("Login required", "Please log in with email and password to add a spot.");
+      return;
+    }
+
+    const state = await readDailyCounter();
+    if (state.count >= DAILY_OUTLET_ADD_LIMIT) {
+      Alert.alert(
+        "Daily limit reached",
+        "Outlet additions are limited to 10 per day. Please try again tomorrow."
+      );
+      return;
+    }
+
+    const nextCount = state.count + 1;
+    await saveDailyCounter(nextCount);
+    setDailyAddCount(nextCount);
+
+    try {
+      await apiRequest("POST", "/api/add-spot/notify", {
+        userEmail,
+        venueName,
+        venueType,
+        outletCount,
+        notes,
+        latitude: userLocation?.latitude ?? null,
+        longitude: userLocation?.longitude ?? null,
+      });
+    } catch (error) {
+      console.log("Failed to notify add-spot email:", error);
+    }
+
     Alert.alert(
       "Spot Added!",
-      `${venueName} has been submitted for review. Thank you for contributing!`,
-      [{ text: "OK", onPress: () => navigation.goBack() }]
+      `${venueName} has been submitted for review. Thank you for contributing!\nToday: ${nextCount}/${DAILY_OUTLET_ADD_LIMIT}`,
+      [
+        {
+          text: "OK",
+          onPress: () => {
+            // Reset form to initial state
+            setVenueName("");
+            setVenueType(null);
+            setOutletCount(1);
+            setSelectedOutletTypes([]);
+            setNotes("");
+            navigation.goBack();
+          },
+        },
+      ]
     );
   };
 
@@ -118,7 +225,11 @@ export default function AddSpotScreen() {
     return (
       <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.primary} />
-        <ThemedText style={styles.loadingText}>Getting your location...</ThemedText>
+        <View style={styles.loadingTextContainer}>
+          <ThemedText style={styles.loadingText}>
+            Loading
+          </ThemedText>
+        </View>
       </ThemedView>
     );
   }
@@ -168,6 +279,15 @@ export default function AddSpotScreen() {
         ) : null}
 
         <View style={styles.formSection}>
+          <View style={[styles.dailyLimitBanner, { backgroundColor: theme.backgroundSecondary }]}>
+            <Feather name="info" size={16} color={theme.primary} />
+            <ThemedText type="small" secondary style={{ marginLeft: Spacing.sm, flex: 1 }}>
+              Outlet additions: {dailyAddCount}/{DAILY_OUTLET_ADD_LIMIT} used today
+            </ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.formSection}>
           <ThemedText type="headline" style={styles.sectionTitle}>
             Venue Name
           </ThemedText>
@@ -204,15 +324,19 @@ export default function AddSpotScreen() {
                 ]}
                 onPress={() => setVenueType(type)}
               >
-                <ThemedText
-                  type="small"
+                <Text
                   style={{
                     color: venueType === type ? "#FFFFFF" : theme.text,
-                    fontWeight: "500",
+                    fontWeight: "600",
+                    fontSize: 12,
+                    textAlign: "center",
+                    includeFontPadding: true,
                   }}
+                  numberOfLines={1}
+                  allowFontScaling={false}
                 >
                   {VENUE_TYPE_LABELS[type]}
-                </ThemedText>
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -259,15 +383,22 @@ export default function AddSpotScreen() {
                 ]}
                 onPress={() => toggleOutletType(type)}
               >
-                <ThemedText
-                  type="small"
+                <Text
+                  allowFontScaling={false}
+                  maxFontSizeMultiplier={1}
                   style={{
                     color: selectedOutletTypes.includes(type) ? "#FFFFFF" : theme.text,
-                    fontWeight: "500",
+                    fontWeight: "600",
+                    fontSize: 12,
+                    textAlign: "center",
+                    includeFontPadding: true,
+                    letterSpacing: 0,
+                    fontFamily: Platform.OS === "android" ? "sans-serif-medium" : undefined,
+                    paddingHorizontal: 6,
                   }}
                 >
-                  {OUTLET_TYPE_LABELS[type]}
-                </ThemedText>
+                  {OUTLET_TYPE_SHORT_LABELS[type]}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -275,7 +406,7 @@ export default function AddSpotScreen() {
 
         <View style={styles.formSection}>
           <ThemedText type="headline" style={styles.sectionTitle}>
-            Notes (Optional)
+            Notes {selectedOutletTypes.includes("other") ? "(Required for Other)" : "(Optional)"}
           </ThemedText>
           <TextInput
             style={[
@@ -287,7 +418,7 @@ export default function AddSpotScreen() {
                 borderColor: theme.border,
               },
             ]}
-            placeholder="Any helpful tips for other users..."
+            placeholder={selectedOutletTypes.includes("other") ? "Please describe the outlet type (e.g., wireless charging, proprietary connector, etc.)" : "Any helpful tips for other users..."}
             placeholderTextColor={theme.textSecondary}
             value={notes}
             onChangeText={setNotes}
@@ -309,9 +440,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    paddingHorizontal: Spacing.xl,
+  },
+  loadingTextContainer: {
+    marginTop: Spacing.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.xl,
+    width: "100%",
+    flexShrink: 0,
   },
   loadingText: {
-    marginTop: Spacing.lg,
+    fontSize: 18,
+    fontWeight: "500",
+    textAlign: "center",
+    includeFontPadding: false,
+    letterSpacing: 0,
+    lineHeight: 22,
+    minWidth: 100,
+    flexShrink: 0,
   },
   scrollContent: {
     paddingTop: Spacing.lg,
@@ -343,6 +491,13 @@ const styles = StyleSheet.create({
   formSection: {
     marginBottom: Spacing.xl,
   },
+  dailyLimitBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
   sectionTitle: {
     marginBottom: Spacing.md,
   },
@@ -366,6 +521,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
+    minWidth: 104,
+    alignItems: "center",
+    justifyContent: "center",
   },
   stepperContainer: {
     flexDirection: "row",
@@ -385,5 +543,41 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     justifyContent: "center",
     alignItems: "center",
+  },
+  submitHeaderButton: {
+    minWidth: 92,
+    height: 36,
+    borderRadius: BorderRadius.full,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+    overflow: "visible",
+  },
+  headerActionButton: {
+    minWidth: 92,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+    overflow: "visible",
+  },
+  headerActionText: {
+    fontSize: 13,
+    fontWeight: "600",
+    includeFontPadding: true,
+    textAlign: "center",
+    letterSpacing: 0,
+    paddingHorizontal: 6,
+    fontFamily: Platform.OS === "android" ? "sans-serif-medium" : undefined,
+  },
+  submitHeaderButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 13,
+    includeFontPadding: true,
+    textAlign: "center",
+    letterSpacing: 0,
+    paddingHorizontal: 6,
+    fontFamily: Platform.OS === "android" ? "sans-serif-medium" : undefined,
   },
 });

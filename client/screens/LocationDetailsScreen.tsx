@@ -24,11 +24,13 @@ if (Platform.OS !== "web") {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
 import { SpotsMap } from "@/components/SpotsMap";
+import { NativeAdCard } from "@/components/ads/AdWidgets";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import {
@@ -39,12 +41,15 @@ import {
 } from "@/data/mockData";
 import { ListStackParamList } from "@/navigation/ListStackNavigator";
 import { useSpots } from "@/hooks/useSpots";
+import { useAds } from "@/context/AdsContext";
 
 type LocationDetailsRouteProp = RouteProp<ListStackParamList, "LocationDetails">;
 
 export default function LocationDetailsScreen() {
   const { theme } = useTheme();
+  const { showAds } = useAds();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
   const route = useRoute<LocationDetailsRouteProp>();
   const navigation = useNavigation();
   const { spotId } = route.params;
@@ -52,14 +57,17 @@ export default function LocationDetailsScreen() {
   const { data: spots = [], isLoading: isSpotsLoading } = useSpots();
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [votes, setVotes] = useState<{ yes: number; no: number }>({ yes: 0, no: 0 });
+  const [didReportNoPlug, setDidReportNoPlug] = useState(false);
 
   const spot = spots.find((s) => s.id === spotId);
+  const outletCount = spot?.outletCount ?? 0;
 
   useEffect(() => {
     setVotes({
       yes: spot?.communityYesVotes ?? 0,
       no: spot?.communityNoVotes ?? 0,
     });
+    setDidReportNoPlug(false);
   }, [spotId, spot]);
 
   useEffect(() => {
@@ -95,17 +103,20 @@ export default function LocationDetailsScreen() {
       )
     : null;
 
-  const totalVotes = votes.yes + votes.no;
-  const communityConsensus = totalVotes === 0 ? null : votes.yes >= votes.no ? "yes" : "no";
   const estimatedConfidence =
     spot?.hasOutlets === true ? 1 : spot?.hasOutlets === false ? 0 : spot?.powerConfidence ?? 0.5;
+  const totalVotes = votes.yes + votes.no;
   const blendedConfidence =
     totalVotes === 0 ? estimatedConfidence : votes.yes / Math.max(totalVotes, 1) * 0.6 + estimatedConfidence * 0.4;
 
-  const handleVote = (choice: "yes" | "no") => {
-    setVotes((prev) =>
-      choice === "yes" ? { yes: prev.yes + 1, no: prev.no } : { yes: prev.yes, no: prev.no + 1 }
-    );
+  const handleNoPlug = () => {
+    setVotes((prev) => {
+      if (didReportNoPlug) {
+        return { yes: prev.yes, no: Math.max(0, prev.no - 1) };
+      }
+      return { yes: prev.yes, no: prev.no + 1 };
+    });
+    setDidReportNoPlug((prev) => !prev);
   };
 
   const openDirections = () => {
@@ -139,7 +150,11 @@ export default function LocationDetailsScreen() {
     return (
       <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.primary} />
-        <ThemedText style={styles.loadingText}>Loading Queensland spot...</ThemedText>
+        <View style={styles.loadingTextContainer}>
+          <ThemedText style={styles.loadingText}>
+            Loading
+          </ThemedText>
+        </View>
       </ThemedView>
     );
   }
@@ -169,7 +184,7 @@ export default function LocationDetailsScreen() {
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: insets.bottom + Spacing.xl },
+            { paddingBottom: tabBarHeight + insets.bottom + Spacing.xl },
           ]}
           showsVerticalScrollIndicator={false}
         >
@@ -186,7 +201,7 @@ export default function LocationDetailsScreen() {
           <View style={styles.content}>
             <View style={styles.headerRow}>
               <View style={[styles.venueTag, { backgroundColor: theme.primary + "20" }]}>
-                <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "700" }}>
+                <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "700" }} numberOfLines={1}>
                   {VENUE_TYPE_LABELS[spot.venueType]}
                 </ThemedText>
               </View>
@@ -225,10 +240,7 @@ export default function LocationDetailsScreen() {
                 <View style={styles.outletCountContainer}>
                   <Feather name="zap" size={24} color={theme.primary} />
                   <ThemedText type="h3" style={{ marginLeft: Spacing.sm }}>
-                    {spot.outletCount}
-                  </ThemedText>
-                  <ThemedText secondary style={{ marginLeft: Spacing.xs }}>
-                    outlets
+                    {`${outletCount} outlets`}
                   </ThemedText>
                 </View>
                 <View style={styles.outletTypes}>
@@ -273,10 +285,11 @@ export default function LocationDetailsScreen() {
               onPress={openGoogleMaps}
             >
               <Feather name="navigation" size={20} color="#FFFFFF" />
-              <ThemedText style={{ color: "#FFFFFF", fontWeight: "700", marginLeft: Spacing.sm }}>
+              <ThemedText style={{ color: "#FFFFFF", fontWeight: "700", marginLeft: Spacing.sm, textAlign: "center" }}>
                 Open in Google Maps
               </ThemedText>
             </Pressable>
+            {showAds ? <NativeAdCard /> : null}
           </View>
         </ScrollView>
       </ThemedView>
@@ -288,7 +301,7 @@ export default function LocationDetailsScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + Spacing.xl },
+          { paddingBottom: tabBarHeight + insets.bottom + Spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -369,10 +382,7 @@ export default function LocationDetailsScreen() {
               <View style={styles.outletCountContainer}>
                 <Feather name="zap" size={24} color={theme.primary} />
                 <ThemedText type="h3" style={{ marginLeft: Spacing.sm }}>
-                  {spot.outletCount}
-                </ThemedText>
-                <ThemedText secondary style={{ marginLeft: Spacing.xs }}>
-                  outlets
+                  {`${outletCount} outlets`}
                 </ThemedText>
               </View>
               <View style={styles.outletTypes}>
@@ -397,57 +407,34 @@ export default function LocationDetailsScreen() {
 
           <Card style={styles.voteCard}>
             <ThemedText type="headline" style={styles.sectionTitle}>
-              Outlet Verification
+              Plug report
             </ThemedText>
             <ThemedText secondary>
-              Community votes decide if outlets exist. More votes increase confidence.
+              Press “No plug” if there is no plug here.
             </ThemedText>
-            <ThemedText secondary type="small" style={{ marginTop: Spacing.sm }}>
-              Now: {votes.yes} yes / {votes.no} no (estimated {Math.round(blendedConfidence * 100)}% yes probability)
-            </ThemedText>
-            <View style={styles.voteRow}>
-              <Pressable
+            <Pressable
+              style={[
+                styles.voteButton,
+                {
+                  borderColor: theme.primary,
+                  backgroundColor: didReportNoPlug ? theme.primary + "20" : "transparent",
+                  marginTop: Spacing.md,
+                },
+              ]}
+              onPress={handleNoPlug}
+            >
+              <ThemedText
                 style={[
-                  styles.voteButton,
-                  { borderColor: theme.primary },
-                  communityConsensus === "yes" && { backgroundColor: theme.primary + "20" },
+                  styles.voteButtonText,
+                  { color: theme.primary },
                 ]}
-                onPress={() => handleVote("yes")}
               >
-                <ThemedText
-                  style={[
-                    styles.voteButtonText,
-                    { color: theme.primary },
-                    communityConsensus === "yes" && { fontWeight: "700" },
-                  ]}
-                >
-                  Outlets available
-                </ThemedText>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.voteButton,
-                  { borderColor: theme.textSecondary },
-                  communityConsensus === "no" && { backgroundColor: theme.textSecondary + "20" },
-                ]}
-                onPress={() => handleVote("no")}
-              >
-                <ThemedText
-                  style={[
-                    styles.voteButtonText,
-                    { color: theme.text },
-                    communityConsensus === "no" && { fontWeight: "700" },
-                  ]}
-                >
-                  No outlets
-                </ThemedText>
-              </Pressable>
-            </View>
-            {communityConsensus ? (
-              <ThemedText type="small" style={{ marginTop: Spacing.sm }}>
-                Current consensus: {communityConsensus === "yes" ? "Outlets likely available" : "Outlets likely unavailable"}
+                No plug
               </ThemedText>
-            ) : null}
+            </Pressable>
+            <ThemedText secondary type="small" style={{ marginTop: Spacing.sm }}>
+              Reports: {votes.no}
+            </ThemedText>
           </Card>
 
           {spot.tips && spot.tips.length > 0 ? (
@@ -469,10 +456,11 @@ export default function LocationDetailsScreen() {
             onPress={openDirections}
           >
             <Feather name="navigation" size={20} color="#FFFFFF" />
-            <ThemedText style={{ color: "#FFFFFF", fontWeight: "600", marginLeft: Spacing.sm }}>
+            <ThemedText style={{ color: "#FFFFFF", fontWeight: "600", marginLeft: Spacing.sm, textAlign: "center" }}>
               Get Directions
             </ThemedText>
           </Pressable>
+          {showAds ? <NativeAdCard /> : null}
         </View>
       </ScrollView>
     </ThemedView>
@@ -487,9 +475,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    paddingHorizontal: Spacing.xl,
+  },
+  loadingTextContainer: {
+    marginTop: Spacing.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.xl,
+    width: "100%",
+    flexShrink: 0,
   },
   loadingText: {
-    marginTop: Spacing.lg,
+    fontSize: 18,
+    fontWeight: "500",
+    textAlign: "center",
+    includeFontPadding: false,
+    letterSpacing: 0,
+    lineHeight: 22,
+    minWidth: 100,
+    flexShrink: 0,
   },
   scrollContent: {
     paddingTop: Spacing.lg,
@@ -524,6 +529,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.sm,
+    minWidth: 100,
+    alignItems: "center",
   },
   shareButton: {
     width: 44,
@@ -604,6 +611,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
+    width: "100%",
   },
 });

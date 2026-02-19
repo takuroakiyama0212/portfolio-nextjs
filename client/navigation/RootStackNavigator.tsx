@@ -1,7 +1,7 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MainTabNavigator from "@/navigation/MainTabNavigator";
-import AddSpotScreen from "@/screens/AddSpotScreen";
+import AddSpotStackNavigator from "@/navigation/AddSpotStackNavigator";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
@@ -25,10 +25,10 @@ export default function RootStackNavigator() {
       />
       <Stack.Screen
         name="AddSpot"
-        component={AddSpotScreen}
+        component={AddSpotStackNavigator}
         options={{
-          presentation: "modal",
-          headerTitle: "Add a spot",
+          presentation: "card",
+          headerShown: false,
         }}
       />
       <Stack.Screen

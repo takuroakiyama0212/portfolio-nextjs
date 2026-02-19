@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -28,6 +28,9 @@ import { ChargingSpot, VenueType, VENUE_TYPE_LABELS, calculateDistance } from "@
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { useSpots } from "@/hooks/useSpots";
 import { SpotsMap } from "@/components/SpotsMap";
+import { StateSelector } from "@/components/StateSelector";
+import { AustralianState, AUSTRALIAN_STATES } from "@/data/australianStates";
+import { useAds } from "@/context/AdsContext";
 
 let MapView: any = null;
 let Marker: any = null;
@@ -47,8 +50,7 @@ type Region = {
   longitudeDelta: number;
 };
 
-const FILTER_OPTIONS: (VenueType | "all")[] = [
-  "all",
+const FILTER_OPTIONS: VenueType[] = [
   "cafe",
   "library",
   "airport",
@@ -58,27 +60,45 @@ const FILTER_OPTIONS: (VenueType | "all")[] = [
   "hotel",
 ];
 
-const DEFAULT_REGION: Region = {
-  latitude: -27.4698,
-  longitude: 153.0251,
-  latitudeDelta: 0.25,
-  longitudeDelta: 0.25,
-};
-
 export default function MapScreen() {
   const { theme, isDark } = useTheme();
+  const { maybeShowInterstitialAfterSearch } = useAds();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<any>();
   const mapRef = useRef<any>(null);
 
+  const [selectedState, setSelectedState] = useState<AustralianState>("QLD");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<VenueType | "all">("all");
+  const [selectedFilters, setSelectedFilters] = useState<Set<VenueType>>(new Set());
   const [selectedSpot, setSelectedSpot] = useState<ChargingSpot | null>(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { data: spots = [], isLoading: isSpotsLoading } = useSpots();
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const {
+    data: spots = [],
+    isLoading: isSpotsLoading,
+    isFetching: isSpotsFetching,
+  } = useSpots(selectedState);
+
+  // Get default region based on selected state
+  const getDefaultRegion = useCallback((state: AustralianState): Region => {
+    const stateBounds = AUSTRALIAN_STATES[state];
+    // Calculate appropriate delta based on state size
+    const latDelta = Math.abs(stateBounds.north - stateBounds.south) * 1.2;
+    const lonDelta = Math.abs(stateBounds.east - stateBounds.west) * 1.2;
+    
+    return {
+      latitude: stateBounds.centerLat,
+      longitude: stateBounds.centerLon,
+      latitudeDelta: Math.max(latDelta, 0.5), // Minimum 0.5 for small states
+      longitudeDelta: Math.max(lonDelta, 0.5),
+    };
+  }, []);
+
+  const DEFAULT_REGION = useMemo(() => getDefaultRegion(selectedState), [selectedState, getDefaultRegion]);
 
   const bottomSheetTranslateY = useSharedValue(200);
 
@@ -90,13 +110,28 @@ export default function MapScreen() {
     requestLocationPermission();
   }, []);
 
+  // After the initial load, don't block the whole UI on state changes (OSM can be slow).
   useEffect(() => {
-    if (selectedSpot) {
+    if (!isSpotsLoading) {
+      setHasLoadedOnce(true);
+    }
+  }, [isSpotsLoading]);
+
+  // Update map region when state changes
+  useEffect(() => {
+    if (mapRef.current) {
+      const newRegion = getDefaultRegion(selectedState);
+      mapRef.current.animateToRegion(newRegion, 1000);
+    }
+  }, [selectedState]);
+
+  useEffect(() => {
+    if (selectedSpot && isBottomSheetOpen) {
       bottomSheetTranslateY.value = withSpring(0, { damping: 20, stiffness: 150 });
     } else {
       bottomSheetTranslateY.value = withSpring(200, { damping: 20, stiffness: 150 });
     }
-  }, [selectedSpot]);
+  }, [selectedSpot, isBottomSheetOpen]);
 
   const requestLocationPermission = async () => {
     if (Platform.OS === "web") {
@@ -130,14 +165,23 @@ export default function MapScreen() {
     }
   };
 
-  const filteredSpots = spots.filter((spot) => {
-    const matchesFilter = selectedFilter === "all" || spot.venueType === selectedFilter;
+  // Always include selectedSpot in filteredSpots even if it doesn't match filters
+  const baseFilteredSpots = spots.filter((spot) => {
+    // If no filters selected, show all spots
+    const matchesFilter = selectedFilters.size === 0 || selectedFilters.has(spot.venueType);
     const matchesSearch =
       searchQuery === "" ||
       spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       spot.address.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
-  }).map((spot) => ({
+  });
+
+  // Ensure selectedSpot is always included if it exists
+  const allSpotsToShow = selectedSpot && !baseFilteredSpots.find(s => s.id === selectedSpot.id)
+    ? [...baseFilteredSpots, selectedSpot]
+    : baseFilteredSpots;
+
+  const filteredSpots = allSpotsToShow.map((spot) => ({
     ...spot,
     distance: userLocation
       ? calculateDistance(
@@ -151,6 +195,7 @@ export default function MapScreen() {
 
   const handleMarkerPress = (spot: ChargingSpot) => {
     setSelectedSpot(spot);
+    setIsBottomSheetOpen(true);
     mapRef.current?.animateToRegion({
       latitude: spot.latitude,
       longitude: spot.longitude,
@@ -183,13 +228,17 @@ export default function MapScreen() {
     Linking.openURL(url);
   };
 
-  const isBusy = isLoading || isSpotsLoading;
+  const isBusy = (isLoading || isSpotsLoading) && !hasLoadedOnce;
 
   if (isBusy) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.backgroundRoot }]}>
         <ActivityIndicator size="large" color={theme.primary} />
-        <ThemedText style={styles.loadingText}>Finding your location...</ThemedText>
+        <View style={styles.loadingTextContainer}>
+          <ThemedText style={styles.loadingText}>
+            Loading
+          </ThemedText>
+        </View>
       </View>
     );
   }
@@ -225,20 +274,25 @@ export default function MapScreen() {
   const renderSpotCard = ({ item }: { item: ChargingSpot & { distance?: number } }) => (
     <Pressable
       style={[styles.webSpotCard, { backgroundColor: theme.backgroundDefault }]}
-      onPress={() => setSelectedSpot(item)}
+      onPress={() => {
+        setSelectedSpot(item);
+        setIsBottomSheetOpen(true);
+      }}
     >
       <View style={styles.webSpotCardHeader}>
         <View style={[styles.webSpotIcon, { backgroundColor: theme.primary }]}>
           <Feather name="battery-charging" size={20} color="#FFFFFF" />
         </View>
-        <View style={{ flex: 1, marginLeft: Spacing.md }}>
-          <ThemedText type="headline">{item.name}</ThemedText>
-          <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }}>
+        <View style={{ flex: 1, marginLeft: Spacing.md, marginRight: Spacing.sm }}>
+          <ThemedText type="headline" numberOfLines={2} style={{ flexWrap: "wrap" }}>
+            {item.name}
+          </ThemedText>
+          <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }} numberOfLines={2}>
             {item.address}
           </ThemedText>
         </View>
         <View style={[styles.venueTag, { backgroundColor: theme.primary + "20" }]}>
-          <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "500" }}>
+          <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "500" }} numberOfLines={1}>
             {VENUE_TYPE_LABELS[item.venueType]}
           </ThemedText>
         </View>
@@ -247,7 +301,7 @@ export default function MapScreen() {
         <View style={styles.statItem}>
           <Feather name="zap" size={16} color={theme.primary} />
           <ThemedText secondary style={{ marginLeft: Spacing.xs, fontSize: 14 }}>
-            {item.outletCount} outlets
+            {`${item.outletCount ?? 0} outlets`}
           </ThemedText>
         </View>
         {item.hours ? (
@@ -264,7 +318,7 @@ export default function MapScreen() {
         onPress={() => openDirections(item)}
       >
         <Feather name="navigation" size={16} color="#FFFFFF" />
-        <ThemedText style={{ color: "#FFFFFF", fontWeight: "600", marginLeft: Spacing.sm }}>
+        <ThemedText style={{ color: "#FFFFFF", fontWeight: "600", marginLeft: Spacing.sm, textAlign: "center" }}>
           Get Directions
         </ThemedText>
       </Pressable>
@@ -278,7 +332,7 @@ export default function MapScreen() {
           <View style={styles.webHeaderRow}>
             <View style={styles.webHeaderTitle}>
               <Feather name="battery-charging" size={28} color={theme.primary} />
-              <ThemedText type="h4" style={{ marginLeft: Spacing.sm }}>Charge Spotter</ThemedText>
+              <ThemedText type="h4" style={{ marginLeft: Spacing.sm }}>Charge Spot</ThemedText>
             </View>
             <Pressable
               style={[styles.headerButton, { backgroundColor: theme.backgroundRoot }]}
@@ -296,19 +350,22 @@ export default function MapScreen() {
               placeholderTextColor={theme.textSecondary}
               value={searchQuery}
               onChangeText={setSearchQuery}
+              onSubmitEditing={maybeShowInterstitialAfterSearch}
             />
             {searchQuery.length > 0 ? (
               <Pressable onPress={() => setSearchQuery("")}>
                 <Feather name="x" size={20} color={theme.textSecondary} />
               </Pressable>
             ) : null}
+            <Pressable
+              style={[styles.searchActionButton, { backgroundColor: theme.primary }]}
+              onPress={maybeShowInterstitialAfterSearch}
+            >
+              <Feather name="search" size={14} color="#FFFFFF" />
+            </Pressable>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filtersContainer}
-          >
+          <View style={styles.filtersContainer}>
             {FILTER_OPTIONS.map((filter) => (
               <Pressable
                 key={filter}
@@ -316,22 +373,31 @@ export default function MapScreen() {
                   styles.filterChip,
                   {
                     backgroundColor:
-                      selectedFilter === filter ? theme.primary : theme.backgroundRoot,
+                      selectedFilters.has(filter) ? theme.primary : theme.backgroundRoot,
                   },
                 ]}
-                onPress={() => setSelectedFilter(filter)}
+                onPress={() => {
+                const newFilters = new Set(selectedFilters);
+                // Toggle the specific filter
+                if (newFilters.has(filter)) {
+                  newFilters.delete(filter);
+                } else {
+                  newFilters.add(filter);
+                }
+                setSelectedFilters(newFilters);
+              }}
               >
                 <ThemedText
                   style={{
-                    color: selectedFilter === filter ? "#FFFFFF" : theme.text,
+                    color: selectedFilters.has(filter) ? "#FFFFFF" : theme.text,
                     fontWeight: "500",
                   }}
                 >
-                  {filter === "all" ? "All" : VENUE_TYPE_LABELS[filter]}
+                  {VENUE_TYPE_LABELS[filter]}
                 </ThemedText>
               </Pressable>
             ))}
-          </ScrollView>
+          </View>
         </View>
 
         <View style={styles.webNotice}>
@@ -346,12 +412,15 @@ export default function MapScreen() {
             <SpotsMap
               spots={filteredSpots}
               selectedSpotId={selectedSpot?.id ?? null}
-              onSelectSpot={(spot) => setSelectedSpot(spot)}
+              onSelectSpot={(spot) => {
+                setSelectedSpot(spot);
+                setIsBottomSheetOpen(true);
+              }}
             />
           </View>
 
           <View style={styles.webListPane}>
-            {selectedSpot ? (
+            {selectedSpot && isBottomSheetOpen ? (
               <View style={[styles.webSelectedCard, { backgroundColor: theme.backgroundDefault }]}>
                 <View style={styles.webSelectedHeader}>
                   <View style={{ flex: 1 }}>
@@ -360,7 +429,7 @@ export default function MapScreen() {
                       {selectedSpot.address}
                     </ThemedText>
                   </View>
-                  <Pressable onPress={() => setSelectedSpot(null)} style={styles.webClose}>
+                  <Pressable onPress={() => setIsBottomSheetOpen(false)} style={styles.webClose}>
                     <Feather name="x" size={18} color={theme.textSecondary} />
                   </Pressable>
                 </View>
@@ -418,12 +487,20 @@ export default function MapScreen() {
         initialRegion={DEFAULT_REGION}
         showsUserLocation={locationPermission === "granted"}
         showsMyLocationButton={false}
-        onPress={() => setSelectedSpot(null)}
+        onPress={(e: any) => {
+          // Only clear if tapping directly on map (not on a marker)
+          if (e.nativeEvent.action === "marker-press") {
+            return;
+          }
+          // Keep selectedSpot when filters change - only clear on explicit map tap
+          // setSelectedSpot(null);
+        }}
       >
         {filteredSpots.map((spot) => (
           <Marker
             key={spot.id}
             coordinate={{ latitude: spot.latitude, longitude: spot.longitude }}
+            anchor={{ x: 0.5, y: 0.5 }}
             onPress={() => handleMarkerPress(spot)}
           >
             <View style={[styles.markerContainer, { backgroundColor: theme.primary }]}>
@@ -431,6 +508,18 @@ export default function MapScreen() {
             </View>
           </Marker>
         ))}
+        {selectedSpot && !filteredSpots.find(s => s.id === selectedSpot.id) ? (
+          <Marker
+            key={selectedSpot.id}
+            coordinate={{ latitude: selectedSpot.latitude, longitude: selectedSpot.longitude }}
+            anchor={{ x: 0.5, y: 0.5 }}
+            onPress={() => handleMarkerPress(selectedSpot)}
+          >
+            <View style={[styles.markerContainer, { backgroundColor: theme.primary, opacity: 0.7 }]}>
+              <Feather name="battery-charging" size={16} color="#FFFFFF" />
+            </View>
+          </Marker>
+        ) : null}
       </MapView>
 
       <View style={[styles.headerContainer, { paddingTop: insets.top + Spacing.sm }]}>
@@ -449,50 +538,69 @@ export default function MapScreen() {
           </Pressable>
         </View>
 
-        <View style={[styles.searchContainer, { backgroundColor: theme.backgroundDefault }]}>
-          <Feather name="search" size={20} color={theme.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="Search charging spots..."
-            placeholderTextColor={theme.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 ? (
-            <Pressable onPress={() => setSearchQuery("")}>
-              <Feather name="x" size={20} color={theme.textSecondary} />
-            </Pressable>
-          ) : null}
-        </View>
+        <StateSelector
+          selectedState={selectedState}
+          onStateChange={setSelectedState}
+          isLoading={isSpotsFetching}
+        />
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filtersContainer}
-        >
-          {FILTER_OPTIONS.map((filter) => (
+          <View style={[styles.searchContainer, { backgroundColor: theme.backgroundRoot, marginTop: Spacing.xs }]}>
+            <Feather name="search" size={20} color={theme.textSecondary} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.text }]}
+              placeholder="Search charging spots..."
+              placeholderTextColor={theme.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={maybeShowInterstitialAfterSearch}
+            />
+            {searchQuery.length > 0 ? (
+              <Pressable onPress={() => setSearchQuery("")}>
+                <Feather name="x" size={20} color={theme.textSecondary} />
+              </Pressable>
+            ) : null}
             <Pressable
-              key={filter}
-              style={[
-                styles.filterChip,
-                {
-                  backgroundColor:
-                    selectedFilter === filter ? theme.primary : theme.backgroundDefault,
-                },
-              ]}
-              onPress={() => setSelectedFilter(filter)}
+              style={[styles.searchActionButton, { backgroundColor: theme.primary }]}
+              onPress={maybeShowInterstitialAfterSearch}
             >
-              <ThemedText
-                style={{
-                  color: selectedFilter === filter ? "#FFFFFF" : theme.text,
-                  fontWeight: "500",
+              <Feather name="search" size={14} color="#FFFFFF" />
+            </Pressable>
+          </View>
+
+          <View style={styles.filtersContainer}>
+            {FILTER_OPTIONS.map((filter) => (
+              <Pressable
+                key={filter}
+                style={[
+                  styles.filterChip,
+                  {
+                      backgroundColor:
+                        selectedFilters.has(filter) ? theme.primary : theme.backgroundDefault,
+                  },
+                ]}
+                onPress={() => {
+                  const newFilters = new Set(selectedFilters);
+                  // Toggle the specific filter
+                  if (newFilters.has(filter)) {
+                    newFilters.delete(filter);
+                  } else {
+                    newFilters.add(filter);
+                  }
+                  setSelectedFilters(newFilters);
                 }}
               >
-                {filter === "all" ? "All" : VENUE_TYPE_LABELS[filter]}
-              </ThemedText>
-            </Pressable>
-          ))}
-        </ScrollView>
+                <ThemedText
+                  style={{
+                    color: selectedFilters.has(filter) ? "#FFFFFF" : theme.text,
+                    fontWeight: "500",
+                  }}
+                  numberOfLines={1}
+                >
+                  {VENUE_TYPE_LABELS[filter]}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
       </View>
 
       {selectedSpot ? (
@@ -509,45 +617,47 @@ export default function MapScreen() {
           <View style={styles.bottomSheetHandle} />
           <View style={styles.bottomSheetContent}>
             <View style={styles.bottomSheetHeader}>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="headline">{selectedSpot.name}</ThemedText>
-                <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }}>
+              <View style={{ flex: 1, marginRight: Spacing.sm }}>
+                <ThemedText type="headline" numberOfLines={2} style={{ flexWrap: "wrap" }}>
+                  {selectedSpot.name}
+                </ThemedText>
+                <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }} numberOfLines={2}>
                   {selectedSpot.address}
                 </ThemedText>
               </View>
-              <View style={[styles.venueTag, { backgroundColor: theme.primary + "20" }]}>
-                <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "500" }}>
-                  {VENUE_TYPE_LABELS[selectedSpot.venueType]}
-                </ThemedText>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
+                <View style={[styles.venueTag, { backgroundColor: theme.primary + "20" }]}>
+                  <ThemedText style={{ color: theme.primary, fontSize: 12, fontWeight: "500" }} numberOfLines={1}>
+                    {VENUE_TYPE_LABELS[selectedSpot.venueType]}
+                  </ThemedText>
+                </View>
+                <Pressable
+                  onPress={() => setIsBottomSheetOpen(false)}
+                  style={[styles.closeButton, { backgroundColor: theme.backgroundSecondary }]}
+                >
+                  <Feather name="x" size={20} color={theme.text} />
+                </Pressable>
               </View>
             </View>
             <View style={styles.bottomSheetStats}>
               <View style={styles.statItem}>
                 <Feather name="zap" size={18} color={theme.primary} />
                 <ThemedText style={{ marginLeft: Spacing.xs }}>
-                  {selectedSpot.outletCount} outlets
+                  {`${selectedSpot.outletCount ?? 0} outlets`}
                 </ThemedText>
               </View>
-              {selectedSpot.distance !== undefined ? (
-                <View style={styles.statItem}>
-                  <Feather name="navigation" size={18} color={theme.primary} />
-                  <ThemedText style={{ marginLeft: Spacing.xs }}>
-                    {selectedSpot.distance.toFixed(1)} mi
-                  </ThemedText>
-                </View>
-              ) : null}
             </View>
             <View style={styles.powerRow}>
               <Feather name="battery-charging" size={18} color={theme.primary} />
               <View style={{ marginLeft: Spacing.sm, flex: 1 }}>
-                <ThemedText>
+                <ThemedText numberOfLines={2} style={{ flexWrap: "wrap" }}>
                   {selectedSpot.hasOutlets === true
                     ? "Outlets confirmed"
                     : selectedSpot.hasOutlets === false
                     ? "No outlets reported"
                     : `Estimated ${Math.round((selectedSpot.powerConfidence ?? 0.5) * 100)}% chance of outlets`}
                 </ThemedText>
-                <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }}>
+                <ThemedText secondary type="small" style={{ marginTop: Spacing.xs }} numberOfLines={1}>
                   Community votes: {(selectedSpot.communityYesVotes ?? 0)} yes / {(selectedSpot.communityNoVotes ?? 0)} no
                 </ThemedText>
               </View>
@@ -560,7 +670,7 @@ export default function MapScreen() {
               onPress={() => navigation.navigate("LocationDetails", { spotId: selectedSpot.id })}
             >
               <Feather name="info" size={18} color={theme.primary} />
-              <ThemedText style={{ color: theme.text, fontWeight: "700", marginLeft: Spacing.sm }}>
+              <ThemedText style={{ color: theme.text, fontWeight: "700", marginLeft: Spacing.sm, textAlign: "center" }}>
                 View details
               </ThemedText>
             </Pressable>
@@ -569,7 +679,7 @@ export default function MapScreen() {
               onPress={() => openDirections(selectedSpot)}
             >
               <Feather name="navigation" size={18} color="#FFFFFF" />
-              <ThemedText style={{ color: "#FFFFFF", fontWeight: "600", marginLeft: Spacing.sm }}>
+              <ThemedText style={{ color: "#FFFFFF", fontWeight: "600", marginLeft: Spacing.sm, textAlign: "center" }}>
                 Get Directions
               </ThemedText>
             </Pressable>
@@ -591,9 +701,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    paddingHorizontal: Spacing.xl,
+  },
+  loadingTextContainer: {
+    marginTop: Spacing.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.xl,
+    width: "100%",
+    flexShrink: 0,
   },
   loadingText: {
-    marginTop: Spacing.lg,
+    fontSize: 18,
+    fontWeight: "500",
+    textAlign: "center",
+    includeFontPadding: false,
+    letterSpacing: 0,
+    lineHeight: 22,
+    minWidth: 100,
+    flexShrink: 0,
   },
   permissionContainer: {
     flex: 1,
@@ -648,7 +775,17 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
     fontSize: 16,
   },
+  searchActionButton: {
+    width: 30,
+    height: 30,
+    borderRadius: BorderRadius.full,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: Spacing.xs,
+  },
   filtersContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     paddingVertical: Spacing.sm,
     gap: Spacing.sm,
   },
@@ -656,7 +793,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    marginRight: Spacing.sm,
     ...Shadows.small,
   },
   markerContainer: {
@@ -692,15 +828,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.xs,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   venueTag: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.xs,
+    minWidth: 80,
+    alignItems: "center",
   },
   bottomSheetStats: {
     flexDirection: "row",
     marginTop: Spacing.md,
-    gap: Spacing.xl,
+    gap: Spacing.md,
+    flexWrap: "wrap",
   },
   powerRow: {
     flexDirection: "row",
@@ -716,8 +862,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
     marginTop: Spacing.lg,
+    width: "100%",
   },
   webHeader: {
     paddingHorizontal: Spacing.lg,
@@ -779,8 +927,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
     marginTop: Spacing.lg,
+    width: "100%",
   },
   webSpotCard: {
     borderRadius: BorderRadius.md,

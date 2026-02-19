@@ -1,4 +1,5 @@
 import { ChargingSpot, OutletType, VenueType } from "@/data/mockData";
+import { AustralianState, AUSTRALIAN_STATES } from "@/data/australianStates";
 
 type OverpassElement = {
   id: number;
@@ -6,13 +7,6 @@ type OverpassElement = {
   lon?: number;
   center?: { lat: number; lon: number };
   tags?: Record<string, string>;
-};
-
-const QLD_BOUNDS = {
-  south: -29.5,
-  west: 137.99,
-  north: -9.0,
-  east: 153.9,
 };
 
 const POWER_KEYS = ["socket:charging", "socket:domestic", "socket:usb", "power_supply", "charging_station"];
@@ -50,18 +44,18 @@ function derivePowerConfidence(tags: Record<string, string>): { hasOutlets: bool
   return { hasOutlets: null, powerConfidence: 0.4 };
 }
 
-function formatAddress(tags: Record<string, string>): string {
+function formatAddress(tags: Record<string, string>, state?: AustralianState): string {
   const parts = [
     tags["addr:housenumber"],
     tags["addr:street"],
     tags["addr:suburb"],
     tags["addr:city"] || tags["addr:town"],
-    tags["addr:state"] || "QLD",
+    tags["addr:state"] || state || "Australia",
   ].filter(Boolean);
-  return parts.join(", ") || "Queensland, Australia";
+  return parts.join(", ") || (state ? `${AUSTRALIAN_STATES[state].name}, Australia` : "Australia");
 }
 
-function mapElementToSpot(element: OverpassElement): ChargingSpot | null {
+function mapElementToSpot(element: OverpassElement, state?: AustralianState): ChargingSpot | null {
   if (!element.tags) return null;
 
   const { tags } = element;
@@ -78,7 +72,7 @@ function mapElementToSpot(element: OverpassElement): ChargingSpot | null {
   return {
     id: `osm-${element.id}`,
     name: tags["name"] || "Unnamed location",
-    address: formatAddress(tags),
+    address: formatAddress(tags, state),
     venueType,
     latitude,
     longitude,
@@ -95,20 +89,30 @@ function mapElementToSpot(element: OverpassElement): ChargingSpot | null {
 }
 
 /**
- * Fetch charging-friendly venues from OpenStreetMap Overpass for Queensland, AU.
+ * Fetch charging-friendly venues from OpenStreetMap Overpass for the specified Australian state.
  */
-export async function fetchOsmSpots(): Promise<ChargingSpot[]> {
+export async function fetchOsmSpots(state: AustralianState = "QLD"): Promise<ChargingSpot[]> {
+  const bounds = AUSTRALIAN_STATES[state];
+  
+  // For "ALL", we need to query multiple states or use the entire Australia bounds
+  // For simplicity, we'll use the ALL bounds which covers all of Australia
   const overpassQuery = `
-    [out:json][timeout:50];
+    [out:json][timeout:100];
     (
-      node["amenity"~"cafe|library"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
-      way["amenity"~"cafe|library"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
-      node["amenity"="coworking_space"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
-      way["amenity"="coworking_space"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
-      node["office"~"coworking|coworking_space"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
-      way["office"~"coworking|coworking_space"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
-      node["aeroway"="aerodrome"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
-      way["aeroway"="aerodrome"](${QLD_BOUNDS.south},${QLD_BOUNDS.west},${QLD_BOUNDS.north},${QLD_BOUNDS.east});
+      node["amenity"~"cafe|library"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      way["amenity"~"cafe|library"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      node["amenity"="coworking_space"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      way["amenity"="coworking_space"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      node["office"~"coworking|coworking_space"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      way["office"~"coworking|coworking_space"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      node["aeroway"="aerodrome"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      way["aeroway"="aerodrome"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      node["amenity"="restaurant"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      way["amenity"="restaurant"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      node["amenity"="hotel"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      way["amenity"="hotel"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      node["shop"="mall"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+      way["shop"="mall"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
     );
     out center 60;
   `;
@@ -126,7 +130,7 @@ export async function fetchOsmSpots(): Promise<ChargingSpot[]> {
 
   const data = (await res.json()) as { elements?: OverpassElement[] };
   const spots = (data.elements || [])
-    .map(mapElementToSpot)
+    .map((element) => mapElementToSpot(element, state))
     .filter((spot): spot is ChargingSpot => Boolean(spot));
 
   return spots;

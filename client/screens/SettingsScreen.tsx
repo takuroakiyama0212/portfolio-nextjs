@@ -17,9 +17,11 @@ import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { useAds } from "@/context/AdsContext";
 
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
+  const { isSubscribed, setSubscribed } = useAds();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -136,6 +138,43 @@ export default function SettingsScreen() {
               trackColor={{ false: theme.border, true: theme.primary + "80" }}
               thumbColor={notifications ? theme.primary : theme.backgroundTertiary}
             />
+          </View>
+        </Card>
+
+        <ThemedText type="headline" style={styles.sectionTitle}>
+          Subscription
+        </ThemedText>
+
+        <Card style={styles.settingsCard}>
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Feather name="zap" size={20} color={theme.primary} />
+              <View style={styles.settingText}>
+                <ThemedText>Charge Spotter Plus</ThemedText>
+                <ThemedText secondary type="small">
+                  {isSubscribed
+                    ? "Subscribed: all ads are hidden"
+                    : "Pay AUD 1/week to remove all ads"}
+                </ThemedText>
+              </View>
+            </View>
+            <Switch
+              value={isSubscribed}
+              onValueChange={setSubscribed}
+              trackColor={{ false: theme.border, true: theme.primary + "80" }}
+              thumbColor={isSubscribed ? theme.primary : theme.backgroundTertiary}
+            />
+          </View>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Feather name="credit-card" size={20} color={theme.primary} />
+              <View style={styles.settingText}>
+                <ThemedText secondary type="small">
+                  Weekly plan: AUD 1 / week. Cancel anytime.
+                </ThemedText>
+              </View>
+            </View>
           </View>
         </Card>
 

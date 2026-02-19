@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
@@ -43,3 +44,47 @@ app-example
 /android
 node_modules/
 .DS_Store
+=======
+x# Node modules
+node_modules/
+package-lock.json
+
+# Next.js build output
+.next/
+out/
+
+# Production build
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Vercel deployment
+.vercel/
+
+# Optional: if using TypeScript
+*.tsbuildinfo
+
+# Optional: if using testing tools
+coverage/
+jest-test-results.json
+
+# Optional: if using IDEs
+.vscode/
+.idea/
+
+# Optional: if using TurboRepo or monorepo
+turbo/
+node_modules
+.env
+.next
+.npm-cache
+
+>>>>>>> 0450b16d85630ec74371737bc994fca90610fcb8

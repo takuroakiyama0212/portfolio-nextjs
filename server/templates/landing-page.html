@@ -83,6 +83,13 @@
         }
       }
 
+      .qr-column {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+
       .card {
         background: linear-gradient(180deg, var(--card), var(--card2));
         border: 1px solid var(--border);
@@ -362,17 +369,19 @@
             </div>
           </div>
 
-          <div class="card">
-            <div class="qr-wrap">
-              <div class="qr-card">
-                <div class="qr-box" id="qr-code" aria-label="QR Code"></div>
-                <p class="hint">
-                  Scan this QR code to open Charge Spotter in your web browser. Works on any device with a browser.
-                </p>
-                <div class="row">
-                  <a class="btn btn-primary" href="BASE_URL_PLACEHOLDER/web" id="open-web-btn">
-                    Open Web Version
-                  </a>
+          <div class="qr-column">
+            <div class="card">
+              <div class="qr-wrap">
+                <div class="qr-card">
+                  <div class="qr-box" id="qr-web" aria-label="Web QR Code"></div>
+                  <p class="hint">
+                    Scan this QR code to open Charge Spotter in your web browser. Works on any device with a browser.
+                  </p>
+                  <div class="row">
+                    <a class="btn btn-primary" href="BASE_URL_PLACEHOLDER/web" id="open-web-btn">
+                      Open Web Version
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -386,7 +395,7 @@
       (function () {
         // Web version QR code
         const webUrl = "BASE_URL_PLACEHOLDER/web";
-        const qrCode = new QRCodeStyling({
+        const webQr = new QRCodeStyling({
           width: 500,
           height: 500,
           data: webUrl,
@@ -414,7 +423,7 @@
             errorCorrectionLevel: "H",
           },
         });
-        qrCode.append(document.getElementById("qr-code"));
+        webQr.append(document.getElementById("qr-web"));
       })();
     </script>
   </body>

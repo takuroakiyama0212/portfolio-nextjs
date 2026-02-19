@@ -1,9 +1,8 @@
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "../server/routes";
 import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
 
 const app = express();
 const log = console.log;
@@ -143,13 +142,8 @@ function serveLandingPage({
   const host = forwardedHost || req.get("host");
   const baseUrl = `${protocol}://${host}`;
   const expsUrl = `${host}`;
-  // Metro host: use REACT_NATIVE_PACKAGER_HOSTNAME if set, otherwise use request hostname
-  const metroHost = process.env.REACT_NATIVE_PACKAGER_HOSTNAME || req.hostname || "localhost";
-  const metroHostPort = `${metroHost}:8081`;
-
-  log(`baseUrl`, baseUrl);
-  log(`expsUrl`, expsUrl);
-  log(`metroHostPort`, metroHostPort);
+  // For Vercel, we don't use Metro, so we'll just use the web URL
+  const metroHostPort = host || "localhost:8081";
 
   const html = landingPageTemplate
     .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
@@ -178,9 +172,8 @@ function serveDownloadPage({
   const host = forwardedHost || req.get("host");
   const baseUrl = `${protocol}://${host}`;
   const expsUrl = `${host}`;
-  // Metro host: use REACT_NATIVE_PACKAGER_HOSTNAME if set, otherwise use request hostname
-  const metroHost = process.env.REACT_NATIVE_PACKAGER_HOSTNAME || req.hostname || "localhost";
-  const metroHostPort = `${metroHost}:8081`;
+  // For Vercel, we don't use Metro, so we'll just use the web URL
+  const metroHostPort = host || "localhost:8081";
 
   const html = downloadPageTemplate
     .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
@@ -301,43 +294,28 @@ function setupErrorHandler(app: express.Application) {
   });
 }
 
-(async () => {
+// Initialize app for Vercel
+let appInitialized = false;
+
+async function initializeApp() {
+  if (appInitialized) return;
+  
   setupCors(app);
   setupBodyParsing(app);
   setupRequestLogging(app);
 
   configureExpoAndLanding(app);
 
-  const server = await registerRoutes(app);
+  await registerRoutes(app);
 
   setupErrorHandler(app);
+  
+  appInitialized = true;
+}
 
-  const port = parseInt(process.env.PORT || "5000", 10);
-  // Use 0.0.0.0 for LAN access, localhost only if explicitly set
-  const host =
-    process.env.HOST ||
-    (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS
-      ? "0.0.0.0"
-      : process.env.NODE_ENV === "development" && !process.env.HOST
-      ? "0.0.0.0"
-      : "localhost");
-  server.listen(
-    {
-      port,
-      host,
-    },
-    () => {
-      log(`express server serving on http://${host}:${port}`);
-      if (host === "0.0.0.0") {
-        const networkInterfaces = os.networkInterfaces();
-        for (const name of Object.keys(networkInterfaces)) {
-          for (const iface of networkInterfaces[name] || []) {
-            if (iface.family === "IPv4" && !iface.internal) {
-              log(`  Also available at http://${iface.address}:${port}`);
-            }
-          }
-        }
-      }
-    },
-  );
-})();
+// Vercel serverless function handler
+export default async function handler(req: Request, res: Response) {
+  await initializeApp();
+  app(req, res);
+}
+

@@ -18,6 +18,25 @@ Notes:
 ## Run Web (browser)
 `npm run all:dev:local`
 
+## Deploy to Vercel
+
+1. **Build the web version:**
+   ```bash
+   npm run build:web
+   ```
+
+2. **Deploy to Vercel:**
+   - Install Vercel CLI: `npm i -g vercel`
+   - Run: `vercel`
+   - Or connect your GitHub repository to Vercel dashboard
+
+3. **After deployment:**
+   - The landing page will be available at your Vercel URL (e.g., `https://your-app.vercel.app/`)
+   - The web app will be available at `/web` (e.g., `https://your-app.vercel.app/web`)
+   - QR code on the landing page will automatically point to your Vercel URL
+
+**Note:** Vercel will automatically run `npm run build:web` during deployment. The `vercel.json` configuration handles routing for the web app and static assets.
+
 ## What you get
 - Map + list of charging-friendly venues in QLD (cafes, libraries, airports, malls, coworking)
 - Community voting and confidence display for outlet availability

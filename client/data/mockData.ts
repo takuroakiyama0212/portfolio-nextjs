@@ -21,9 +21,10 @@ export interface ChargingSpot {
   powerConfidence?: number;
   communityYesVotes?: number;
   communityNoVotes?: number;
-  source?: "mock" | "osm";
+  source?: "mock" | "osm" | "qld-libraries" | "nt-libraries" | "tas-libraries" | "sa-libraries";
   phone?: string;
   hours?: string;
+  web?: string;
   tips?: string[];
   distance?: number;
 }
@@ -1824,23 +1825,6 @@ export const MOCK_SPOTS: ChargingSpot[] = [
     communityNoVotes: 0,
     hours: "9:00 AM - 5:30 PM",
     tips: ["Look near cafe seating and shared tables for power points."],
-    source: "mock",
-  },
-  {
-    id: "169",
-    name: "Caloundra Library",
-    address: "1 Omrah Ave, Caloundra QLD",
-    venueType: "library",
-    latitude: -26.8034,
-    longitude: 153.1312,
-    outletCount: 16,
-    outletTypes: ["standard", "usb-a"],
-    hasOutlets: true,
-    powerConfidence: 0.86,
-    communityYesVotes: 0,
-    communityNoVotes: 0,
-    hours: "9:00 AM - 5:00 PM",
-    tips: ["Desk rows and quiet study areas usually have outlets."],
     source: "mock",
   },
   {

@@ -6,6 +6,8 @@ import {
   Pressable,
   Switch,
   TextInput,
+  Text,
+  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,10 +20,13 @@ import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { useAds } from "@/context/AdsContext";
+import { useAuth } from "@/context/AuthContext";
+import { Alert } from "react-native";
 
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
   const { isSubscribed, setSubscribed } = useAds();
+  const { isAuthenticated, userEmail, signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -29,6 +34,27 @@ export default function SettingsScreen() {
   const [useKilometers, setUseKilometers] = useState(false);
   const [autoLocate, setAutoLocate] = useState(true);
   const [notifications, setNotifications] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Log Out",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Log Out",
+          style: "destructive",
+          onPress: async () => {
+            await signOut();
+            navigation.goBack();
+          },
+        },
+      ]
+    );
+  };
 
   React.useEffect(() => {
     navigation.setOptions({
@@ -57,7 +83,7 @@ export default function SettingsScreen() {
             <View style={styles.profileInfo}>
               <ThemedText type="headline">{displayName}</ThemedText>
               <ThemedText secondary type="small">
-                Tap to edit your display name
+                {isAuthenticated && userEmail ? userEmail : "Tap to edit your display name"}
               </ThemedText>
             </View>
           </View>
@@ -76,6 +102,39 @@ export default function SettingsScreen() {
             onChangeText={setDisplayName}
           />
         </Card>
+
+        {isAuthenticated ? (
+          <>
+            <ThemedText type="headline" style={styles.sectionTitle}>
+              Account
+            </ThemedText>
+
+            <Card style={styles.settingsCard}>
+              <Pressable style={styles.aboutRow} onPress={handleLogout}>
+                <View style={styles.settingInfo}>
+                  <Feather name="log-out" size={20} color={theme.error} />
+                  <Text
+                    allowFontScaling={false}
+                    maxFontSizeMultiplier={1}
+                    numberOfLines={1}
+                    style={{
+                      marginLeft: Spacing.md,
+                      color: theme.error,
+                      fontSize: 16,
+                      fontWeight: "400",
+                      flexShrink: 1,
+                      includeFontPadding: false,
+                      fontFamily: Platform.OS === "android" ? "sans-serif" : undefined,
+                    }}
+                  >
+                    Log Out
+                  </Text>
+                </View>
+                <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+              </Pressable>
+            </Card>
+          </>
+        ) : null}
 
         <ThemedText type="headline" style={styles.sectionTitle}>
           Preferences

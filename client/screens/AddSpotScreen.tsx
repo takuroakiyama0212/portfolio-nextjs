@@ -34,6 +34,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { VenueType, OutletType, VENUE_TYPE_LABELS, OUTLET_TYPE_LABELS } from "@/data/mockData";
 import { apiRequest } from "@/lib/query-client";
+import { addSpotToFirestore } from "@/lib/firestore";
 
 const VENUE_TYPES: VenueType[] = ["cafe", "library", "airport", "mall", "restaurant", "hotel", "coworking"];
 const OUTLET_TYPES: OutletType[] = ["usb-a", "usb-c", "standard", "other"];
@@ -187,6 +188,47 @@ export default function AddSpotScreen() {
     await saveDailyCounter(nextCount);
     setDailyAddCount(nextCount);
 
+    // Validate location
+    if (!userLocation) {
+      Alert.alert("Location Required", "Please enable location services to add a spot.");
+      return;
+    }
+
+    // Build address from location (simplified - could be enhanced with reverse geocoding)
+    const address = `${venueName}, ${userLocation.latitude.toFixed(4)}, ${userLocation.longitude.toFixed(4)}`;
+
+    // Save to Firestore
+    try {
+      const firestoreResult = await addSpotToFirestore(
+        {
+          name: venueName,
+          address: address,
+          venueType: venueType,
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          outletCount: outletCount,
+          outletTypes: selectedOutletTypes,
+          hasOutlets: null, // Not verified yet
+          powerConfidence: 0.5, // Default confidence for user-submitted spots
+          communityYesVotes: 0,
+          communityNoVotes: 0,
+          tips: notes.trim() ? [notes.trim()] : undefined,
+        },
+        userEmail
+      );
+
+      if (!firestoreResult.ok) {
+        console.error("Failed to save to Firestore:", firestoreResult.error);
+        Alert.alert("Error", "Failed to save spot. Please try again.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error saving to Firestore:", error);
+      Alert.alert("Error", "Failed to save spot. Please try again.");
+      return;
+    }
+
+    // Send email notification
     try {
       await apiRequest("POST", "/api/add-spot/notify", {
         userEmail,
@@ -194,8 +236,8 @@ export default function AddSpotScreen() {
         venueType,
         outletCount,
         notes,
-        latitude: userLocation?.latitude ?? null,
-        longitude: userLocation?.longitude ?? null,
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
       });
     } catch (error) {
       console.log("Failed to notify add-spot email:", error);

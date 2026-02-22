@@ -1,1 +1,10 @@
+## Firebase Admin service account (DO NOT COMMIT)
+serviceAccountKey.json
+
+## Local CSV exports / imports
+plconnect-directory-branches-2024-05-29.csv
+
+## Usual local env files
+.env
+.env.*
 

@@ -3,6 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { ChargingSpot, MOCK_SPOTS } from "@/data/mockData";
 import { fetchOsmSpots } from "@/lib/osm";
 import { AustralianState } from "@/data/australianStates";
+import { QLD_LIBRARIES } from "@/data/qldLibraries";
+import { NT_LIBRARIES } from "@/data/ntLibraries";
+import { TAS_LIBRARIES } from "@/data/tasLibraries";
+import { SA_LIBRARIES } from "@/data/saLibraries";
 
 function spotKey(spot: ChargingSpot): string {
   const name = spot.name.trim().toLowerCase();
@@ -46,7 +50,28 @@ function ensureLibraryAndAirport(spots: ChargingSpot[], fallbackPool: ChargingSp
 function getMockSpotsForState(state: AustralianState): ChargingSpot[] {
   if (state === "ALL") return MOCK_SPOTS;
   const stateSuffix = ` ${state}`;
-  return MOCK_SPOTS.filter((spot) => spot.address.toUpperCase().includes(stateSuffix));
+  let mockSpots = MOCK_SPOTS.filter((spot) => spot.address.toUpperCase().includes(stateSuffix));
+  
+  // Remove libraries from MOCK_SPOTS if we have state-specific library data
+  // This prevents duplicates when state-specific libraries are added
+  if (state === "QLD") {
+    mockSpots = mockSpots.filter((spot) => !(spot.venueType === "library"));
+    return [...mockSpots, ...QLD_LIBRARIES];
+  }
+  if (state === "NT") {
+    mockSpots = mockSpots.filter((spot) => !(spot.venueType === "library"));
+    return [...mockSpots, ...NT_LIBRARIES];
+  }
+  if (state === "TAS") {
+    mockSpots = mockSpots.filter((spot) => !(spot.venueType === "library"));
+    return [...mockSpots, ...TAS_LIBRARIES];
+  }
+  if (state === "SA") {
+    mockSpots = mockSpots.filter((spot) => !(spot.venueType === "library"));
+    return [...mockSpots, ...SA_LIBRARIES];
+  }
+  
+  return mockSpots;
 }
 
 /**

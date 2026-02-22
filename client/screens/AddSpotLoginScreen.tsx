@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Card } from "@/components/Card";
@@ -21,12 +22,14 @@ import { useTheme } from "@/hooks/useTheme";
 export default function AddSpotLoginScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { signIn } = useAuth();
+  const { signIn, register, signInWithGoogle } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState<"login" | "register">("login");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const canSubmit = email.trim().length > 0 && password.trim().length > 0 && !isSubmitting;
@@ -35,7 +38,9 @@ export default function AddSpotLoginScreen() {
     if (!canSubmit) return;
     setIsSubmitting(true);
     setErrorMessage(null);
-    const result = await signIn(email, password);
+    const result = mode === "register"
+      ? await register(email, password)
+      : await signIn(email, password);
     setIsSubmitting(false);
 
     if (!result.ok) {
@@ -44,6 +49,22 @@ export default function AddSpotLoginScreen() {
       );
       return;
     }
+    if (mode === "register") {
+      Alert.alert("Registered", "Your account has been created and you are now logged in.");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    setErrorMessage(null);
+    const result = await signInWithGoogle();
+    setIsGoogleLoading(false);
+
+    if (!result.ok) {
+      setErrorMessage(result.error ?? "Could not sign in with Google.");
+      return;
+    }
+    // Google sign-in automatically creates an account if it doesn't exist
     if (mode === "register") {
       Alert.alert("Registered", "Your account has been created and you are now logged in.");
     }
@@ -130,21 +151,34 @@ export default function AddSpotLoginScreen() {
             ]}
           />
 
-          <TextInput
-            secureTextEntry
-            placeholder="Password"
-            placeholderTextColor={theme.textSecondary}
-            value={password}
-            onChangeText={setPassword}
-            style={[
-              styles.input,
-              {
-                color: theme.text,
-                borderColor: theme.border,
-                backgroundColor: theme.backgroundSecondary,
-              },
-            ]}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              secureTextEntry={!showPassword}
+              placeholder="Password"
+              placeholderTextColor={theme.textSecondary}
+              value={password}
+              onChangeText={setPassword}
+              style={[
+                styles.input,
+                styles.passwordInput,
+                {
+                  color: theme.text,
+                  borderColor: theme.border,
+                  backgroundColor: theme.backgroundSecondary,
+                },
+              ]}
+            />
+            <Pressable
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.passwordToggle}
+            >
+              <Feather
+                name={showPassword ? "eye-off" : "eye"}
+                size={20}
+                color={theme.textSecondary}
+              />
+            </Pressable>
+          </View>
           <ThemedText secondary type="small" style={{ marginTop: -Spacing.xs, marginBottom: Spacing.md }}>
             Use 8+ characters with letters and numbers only.
           </ThemedText>
@@ -165,6 +199,34 @@ export default function AddSpotLoginScreen() {
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.submitText}>{mode === "register" ? "Register" : "Login"}</Text>
+            )}
+          </Pressable>
+
+          <Pressable
+            onPress={handleGoogleSignIn}
+            disabled={isGoogleLoading}
+            style={[
+              styles.googleButton,
+              {
+                backgroundColor: theme.backgroundSecondary,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            {isGoogleLoading ? (
+              <ActivityIndicator color={theme.text} />
+            ) : (
+              <>
+                <AntDesign name="google" size={20} color="#DB4437" style={styles.googleIcon} />
+                <Text
+                  allowFontScaling={false}
+                  maxFontSizeMultiplier={1}
+                  numberOfLines={1}
+                  style={[styles.googleButtonText, { color: theme.text }]}
+                >
+                  Google
+                </Text>
+              </>
             )}
           </Pressable>
         </Card>
@@ -199,6 +261,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: Spacing.md,
     marginBottom: Spacing.md,
+  },
+  passwordContainer: {
+    position: "relative",
+    marginBottom: Spacing.md,
+  },
+  passwordInput: {
+    paddingRight: Spacing.inputHeight,
+  },
+  passwordToggle: {
+    position: "absolute",
+    right: Spacing.md,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    width: Spacing.inputHeight,
   },
   submitButton: {
     height: 46,
@@ -245,6 +323,47 @@ const styles = StyleSheet.create({
     includeFontPadding: true,
     paddingHorizontal: 8,
     flexShrink: 1,
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: Spacing.md,
+    gap: Spacing.sm,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    paddingHorizontal: Spacing.sm,
+  },
+  googleButton: {
+    height: 46,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: Spacing.md,
+    alignSelf: "stretch",
+    paddingHorizontal: Spacing.md,
+    overflow: "visible",
+    position: "relative",
+  },
+  googleIcon: {
+    position: "absolute",
+    left: Spacing.md,
+  },
+  googleButtonText: {
+    width: "100%",
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+    lineHeight: 18,
+    includeFontPadding: Platform.OS === "android" ? false : true,
+    fontFamily: Platform.OS === "android" ? "sans-serif-medium" : undefined,
+    letterSpacing: 0.1,
+    textAlignVertical: "center",
   },
 });
 

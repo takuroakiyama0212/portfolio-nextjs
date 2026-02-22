@@ -32,6 +32,18 @@ function AdsOverlay() {
 }
 
 export default function App() {
+  if (__DEV__) {
+    // Helps diagnose "Element type is invalid" by showing which imports are undefined at runtime.
+    // eslint-disable-next-line no-console
+    console.log("[App] component types", {
+      RootStackNavigator: typeof RootStackNavigator,
+      ErrorBoundary: typeof ErrorBoundary,
+      AdsProvider: typeof AdsProvider,
+      AuthProvider: typeof AuthProvider,
+      InterstitialAdModal: typeof InterstitialAdModal,
+    });
+  }
+
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
   const isDark = colorScheme === "dark";

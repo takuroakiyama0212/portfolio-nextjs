@@ -21,6 +21,8 @@
     "check:format": "prettier --check \"**/*.{js,ts,tsx,css,json}\"",
     "format": "prettier --write \"**/*.{js,ts,tsx,css,json}\"",
     "build:web": "npx expo export --platform web --output-dir web-build"
+    ,
+    "firestore:upload:libraries": "node scripts/upload-libraries-to-firestore.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -47,6 +49,7 @@
     "expo-system-ui": "~6.0.8",
     "expo-web-browser": "~15.0.9",
     "express": "^4.21.2",
+    "firebase": "^12.9.0",
     "http-proxy-middleware": "^3.0.5",
     "leaflet": "^1.9.4",
     "nodemailer": "^7.0.6",
@@ -74,12 +77,14 @@
     "@types/node": "24.10.0",
     "@types/react": "~19.1.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "csv-parser": "^3.2.0",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-node": "^0.3.9",
     "eslint-plugin-prettier": "^5.5.4",
+    "firebase-admin": "^13.6.1",
     "prettier": "3.6.2",
     "typescript": "~5.9.2"
   },

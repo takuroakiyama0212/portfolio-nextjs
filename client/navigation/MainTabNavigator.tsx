@@ -25,6 +25,7 @@ export default function MainTabNavigator() {
       screenOptions={{
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.tabIconDefault,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
